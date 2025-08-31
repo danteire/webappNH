@@ -21,9 +21,7 @@ function MenuPage() {
     <>
       <GlobalStyles/>
       <AppContainer>
-        <Sidebar />
         <MainContent />
-        <RecognitionPanel />
       </AppContainer>
     </>
   );

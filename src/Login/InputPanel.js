@@ -7,8 +7,9 @@ export default function LoginPanel() {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    console.log("Logowanie:", { username, password });
-    navigate('/user');
+      console.log("Logowanie:", { username, password });
+      navigate('/user');
+    
   };
 
   const handleRegister = () => {

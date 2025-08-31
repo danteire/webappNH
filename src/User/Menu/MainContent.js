@@ -1,230 +1,348 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiUpload, FiSearch, FiUser } from 'react-icons/fi';
+import { FiUpload, FiSearch, FiUser, FiLoader } from 'react-icons/fi';
+import HistoryPanel from './History/HistoryPage';
+import {
+  MainContainer,
+  LeftColumn,
+  RightColumn,
+  TopBar,
+  ContentWrapper,
+  Title,
+  UploadBox,
+  UploadIconWrapper,
+  UploadFooter,
+  UploadButton,
+  BackButton,
+  ErrorMessage,
+  WarningMessage,
+  FileName,
+  StorageInfo,
+  ClearStorageButton,
+  DetailsContainer,
+  Thumbnail,
+  DetailText,
+  LoadingContainer,
+  Tooltip,
+  TooltipImage,
+  TooltipText
+} from './MainContent.styles';
 
-const MainContainer = styled.main`
-  flex-grow: 1;
-  padding: 20px;
-  background-color: #1A1A1D;
-  display: flex;
-  flex-direction: column;
-`;
+// Import funkcji obsługi historii
+import {
+  checkStorageQuota,
+  loadHistory,
+  removeFromHistory,
+  getItemDetails,
+  getItemPreview,
+  clearAllHistory
+} from './History/HistoryUtils';
 
-const TopBar = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  margin-bottom: 60px;
+// Import funkcji obsługi uploadu
+import {
+  handleImageUpload,
+  validateFile
+} from './uploadutils';
 
-  svg {
-    font-size: 1.4rem;
-    color: #B0B0B0;
-    margin-left: 20px;
-    cursor: pointer;
-  }
-`;
-
-const ContentWrapper = styled.div`
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding-top: 40px;
-`;
-
-const Title = styled.h3`
-  color: #E0E0E0;
-  margin-bottom: 20px;
-  text-align: center;
-  font-size: 35px;
-`;
-
-const UploadBox = styled.label`
-  width: 350px;
-  height: 180px;
-  border: 2px dashed #4A4A52;
-  border-radius: 10px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding-top: 30px;
-  padding-bottom: 30px;
-  cursor: pointer;
-  transition: border-color 0.2s;
-  margin-top: 60px;
-
-  &:hover {
-    border-color: #6A6A72;
-  }
-
-  input {
-    display: none;
-  }
-`;
-
-const UploadIconWrapper = styled.div`
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-`;
-
-const UploadFooter = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: auto;
-
-  p {
-    margin-top: 80px;
-    color: #B0B0B0;
-  }
-`;
-
-const UploadButton = styled.button`
-  margin-top: 40px;
-  padding: 10px 20px;
-  background-color: #3A3A40;
-  color: #E0E0E0;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: #505057;
-  }
-
-  &:disabled {
-    background-color: #2e2e33;
-    cursor: not-allowed;
-  }
-`;
-
-const ErrorMessage = styled.p`
-  color: #ff6b6b;
-  margin-top: 20px;
-  font-weight: 500;
-`;
-
-const FileName = styled.p`
-  margin-top: 20px;
-  color: #B0B0B0;
-  font-weight: 500;
-`;
-
-const MenuButton = styled.button`
-  margin-top: 20px;
-  padding: 10px 20px;
-  background-color: #444;
-  color: #E0E0E0;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: #666;
-  }
-`;
-
-const MainContent = () => {
+const MainContent = ({ userId }) => {
+  // Stan komponentu
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
+  const [warning, setWarning] = useState(null);
   const navigate = useNavigate();
+  
+  // Historia
+  const [history, setHistory] = useState([]);
+  
+  // Szczegóły
+  const [selectedDetails, setSelectedDetails] = useState(null);
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+  
+  // Tooltip hover
+  const [hoveredItem, setHoveredItem] = useState(null);
+  const [hoveredItemDetails, setHoveredItemDetails] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [isLoadingTooltip, setIsLoadingTooltip] = useState(false);
+  
+  // Storage info
+  const [storageInfo, setStorageInfo] = useState(null);
 
-  const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
-    setError(null);
-  };
-
-  const handleUpload = async () => {
-    if (!selectedFile) {
-      setError("Proszę wybrać plik.");
-      return;
+  // Sprawdź storage przy załadowaniu
+  useEffect(() => {
+    if (!userId) {
+      const info = checkStorageQuota();
+      setStorageInfo(info);
     }
+  }, [userId]);
 
-    setUploading(true);
-    setError(null);
-
-    const reader = new FileReader();
-
-    reader.onloadend = async () => {
-      const base64Image = reader.result.split(',')[1];
-
-      try {
-        const payload = JSON.stringify({ image: base64Image });
-
-        const response = await fetch('http://127.0.0.1:8000/api/upload', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: payload,
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Wystąpił błąd podczas wysyłania zdjęcia.');
-        }
-
-        const data = await response.json();
-
-        navigate('/results', {
-          state: {
-            serverResponses: data,
-            originalImageBase64: base64Image
-          }
-        });
-
-      } catch (err) {
-        console.error('Błąd wysyłania:', err);
-        setError(err.message || 'Nie udało się wysłać zdjęcia.');
-      } finally {
-        setUploading(false);
+  // Ładowanie historii
+  useEffect(() => {
+    const loadHistoryData = async () => {
+      const result = await loadHistory(userId);
+      if (result.success) {
+        setHistory(result.history);
+      } else {
+        setError(result.error);
       }
     };
+    
+    loadHistoryData();
+  }, [userId]);
 
-    reader.onerror = () => {
-      setError("Nie udało się odczytać pliku.");
-      setUploading(false);
-    };
-
-    reader.readAsDataURL(selectedFile);
+  // Funkcja czyszczenia całego storage
+  const handleClearStorage = () => {
+    if (window.confirm('Czy na pewno chcesz usunąć całą historię? Ta operacja jest nieodwracalna.')) {
+      const result = clearAllHistory();
+      if (result.success) {
+        setHistory([]);
+        setSelectedDetails(null);
+        setHoveredItem(null);
+        setHoveredItemDetails(null);
+        setStorageInfo(checkStorageQuota());
+        setError(null);
+        setWarning(null);
+      } else {
+        setError(result.error);
+      }
+    }
   };
 
-  return (
-    <MainContainer>
-      <TopBar>
-        <FiSearch />
-        <FiUser />
-      </TopBar>
+  // Usuwanie z historii
+  const removeHistoryItem = async (index) => {
+    const itemToRemoveId = history[index];
+    
+    const result = await removeFromHistory(itemToRemoveId, index, userId, history);
+    
+    if (result.success) {
+      setHistory(result.newHistory);
+      
+      // Reset stanów jeśli usunięto aktualnie wyświetlany element
+      if (selectedDetails && selectedDetails.id === itemToRemoveId) {
+        setSelectedDetails(null);
+      }
+      if (hoveredItem === itemToRemoveId) {
+        setHoveredItem(null);
+        setHoveredItemDetails(null);
+      }
+      
+      // Odśwież info o storage dla gości
+      if (!userId) {
+        setStorageInfo(checkStorageQuota());
+      }
+    } else {
+      setError(result.error);
+    }
+  };
+
+  // Obsługa zmiany pliku
+  const handleFileChange = useCallback((event) => {
+    const file = event.target.files[0];
+    
+    if (file) {
+      const validation = validateFile(file);
+      if (!validation.isValid) {
+        setError(validation.errors.join(' '));
+        return;
+      }
+    }
+    
+    setSelectedFile(file);
+    setError(null);
+    setWarning(null);
+  }, []);
+
+  // Upload pliku
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      setError('Proszę wybrać plik.');
+      return;
+    }
+    
+    setUploading(true);
+    setError(null);
+    setWarning(null);
+
+    const result = await handleImageUpload(selectedFile, userId, history, navigate);
+    
+    if (result.success) {
+      if (result.newHistory) {
+        setHistory(result.newHistory);
+      }
+      if (result.warning) {
+        setWarning(result.warning);
+      }
+      // navigate jest wywołane w handleImageUpload
+    } else {
+      setError(result.errors.join(' '));
+    }
+    
+    setUploading(false);
+  };
+
+  // Kliknięcie w element historii
+  const handleHistoryItemClick = async (itemId) => {
+    setIsLoadingDetails(true);
+    setError(null);
+    setSelectedDetails(null);
+
+    const result = await getItemDetails(itemId, userId);
+    
+    if (result.success) {
+      // Symulujemy opóźnienie dla lepszego UX
+      if (!userId) {
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+      setSelectedDetails(result.details);
+    } else {
+      setError(result.error);
+    }
+    
+    setIsLoadingDetails(false);
+  };
+
+  // Hover na elemencie historii
+  const handleHistoryItemHover = async (itemId, event) => {
+    if (hoveredItem === itemId || isLoadingTooltip) return;
+    
+    setIsLoadingTooltip(true);
+    setHoveredItem(itemId);
+    
+    // Pozycja tooltip
+    const rect = event.currentTarget.getBoundingClientRect();
+    setTooltipPosition({
+      x: rect.right + 10,
+      y: rect.top
+    });
+
+    const result = await getItemPreview(itemId, userId);
+    
+    if (result.success) {
+      setHoveredItemDetails(result.preview);
+    } else {
+      console.error('Błąd pobierania podglądu:', result.error);
+    }
+    
+    setIsLoadingTooltip(false);
+  };
+
+  // Opuszczenie elementu historii
+  const handleHistoryItemLeave = () => {
+    setHoveredItem(null);
+    setHoveredItemDetails(null);
+    setIsLoadingTooltip(false);
+  };
+
+  // Renderowanie zawartości prawej kolumny
+  const renderRightColumnContent = () => {
+    if (isLoadingDetails) {
+      return (
+        <LoadingContainer>
+          <FiLoader style={{ animation: 'spin 1s linear infinite' }} size={48} color="#B0B0B0" />
+        </LoadingContainer>
+      );
+    }
+    
+    if (selectedDetails) {
+      return (
+        <DetailsContainer>
+          <Title>Szczegóły wpisu</Title>
+          <Thumbnail 
+            src={`data:image/jpeg;base64,${selectedDetails.imageBase64}`} 
+            alt="Miniatura banknotu"
+          />
+          <DetailText>
+            Przewidziany banknot: <span>{selectedDetails.predictedBanknote}</span>
+          </DetailText>
+          {selectedDetails.date && (
+            <DetailText>
+              Data: <span>{new Date(selectedDetails.date).toLocaleDateString('pl-PL')}</span>
+            </DetailText>
+          )}
+          <BackButton onClick={() => setSelectedDetails(null)}>
+            Powrót
+          </BackButton>
+        </DetailsContainer>
+      );
+    }
+    
+    return (
       <ContentWrapper>
         <Title>Prześlij zdjęcie banknotu</Title>
         <UploadBox>
           <input type="file" accept="image/*" onChange={handleFileChange} />
-          <UploadIconWrapper>
-            <FiUpload size={28} color="#B0B0B0" />
-          </UploadIconWrapper>
-          <UploadFooter>
-            <p>Kliknij, aby wybrać plik</p>
-          </UploadFooter>
+          <UploadIconWrapper><FiUpload size={28} color="#B0B0B0" /></UploadIconWrapper>
+          <UploadFooter><p>Kliknij, aby wybrać plik</p></UploadFooter>
         </UploadBox>
-
+        
         {selectedFile && <FileName>Wybrany plik: {selectedFile.name}</FileName>}
         {error && <ErrorMessage>{error}</ErrorMessage>}
-
+        {warning && <WarningMessage>{warning}</WarningMessage>}
+        
+        {/* Informacje o storage dla gości */}
+        {!userId && storageInfo && (
+          <StorageInfo>
+            Wykorzystano: {storageInfo.used}KB / ~5MB
+            {storageInfo.remaining < 1000 && (
+              <>
+                <WarningMessage>
+                  Mało miejsca w pamięci przeglądarki ({storageInfo.remaining}KB)
+                </WarningMessage>
+                <ClearStorageButton onClick={handleClearStorage}>
+                  Wyczyść historię
+                </ClearStorageButton>
+              </>
+            )}
+          </StorageInfo>
+        )}
+        
         <UploadButton onClick={handleUpload} disabled={uploading}>
           {uploading ? 'Wysyłanie...' : 'Wyślij'}
         </UploadButton>
-
       </ContentWrapper>
+    );
+  };
+
+  return (
+    <MainContainer>
+      <LeftColumn>
+        <HistoryPanel 
+          history={history} 
+          onRemove={removeHistoryItem}
+          onClickItem={handleHistoryItemClick}
+          onHoverItem={handleHistoryItemHover}
+          onLeaveItem={handleHistoryItemLeave}
+        />
+      </LeftColumn>
+      <RightColumn>
+        <TopBar>
+          <FiSearch />
+          <FiUser />
+        </TopBar>
+        {renderRightColumnContent()}
+      </RightColumn>
+      
+      {/* Tooltip dla hover */}
+      <Tooltip 
+        visible={hoveredItem && hoveredItemDetails && !isLoadingTooltip}
+        style={{
+          left: tooltipPosition.x,
+          top: tooltipPosition.y
+        }}
+      >
+        {hoveredItemDetails && (
+          <>
+            <TooltipImage 
+              src={`data:image/jpeg;base64,${hoveredItemDetails.imageBase64}`}
+              alt="Podgląd banknotu"
+            />
+            <TooltipText>
+              <div className="banknote">{hoveredItemDetails.predictedBanknote}</div>
+              <div className="date">{hoveredItemDetails.date}</div>
+            </TooltipText>
+          </>
+        )}
+      </Tooltip>
     </MainContainer>
   );
 };
