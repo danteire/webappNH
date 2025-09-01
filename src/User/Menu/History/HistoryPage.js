@@ -7,7 +7,7 @@ const HistoryContainer = styled.div`
   border-radius: 8px;
   padding: 16px;
   height: fit-content;
-  min-height: 200px;
+  min-height: 100%;
 `;
 
 const HistoryTitle = styled.h3`

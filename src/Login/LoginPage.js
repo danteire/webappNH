@@ -2,7 +2,7 @@
 
 import styled from 'styled-components';
 import GlobalStyles from '../components/GlobalStyles';
-import InputPanel from './InputPanel';
+import AuthPanel from './AuthPanel'; // ZMIANA: Z InputPanel na AuthPanel
 
 const AppContainer = styled.div`
   display: flex;
@@ -21,8 +21,7 @@ function LoginPage() {
     <>
       <GlobalStyles/>
       <AppContainer>
-      <InputPanel>
-      </InputPanel>
+        <AuthPanel /> {/* ZMIANA: Z InputPanel na AuthPanel */}
       </AppContainer>
     </>
   );
