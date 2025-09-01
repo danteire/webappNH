@@ -152,7 +152,7 @@ export default function AuthPanel() {
     
     const handleGuestContinue = () => {
         console.log("Kontynuacja jako gość...");
-        navigate('/guest'); // Przekierowanie dla gościa
+        navigate('/user'); // Przekierowanie dla gościa
     };
 
     const toggleAuthMode = () => {
