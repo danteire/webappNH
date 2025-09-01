@@ -324,7 +324,7 @@ export const validateServerUrl = (url) => {
 };
 
 // Funkcja sprawdzania połączenia z serwerem
-export const checkServerConnection = async (serverUrl = 'http://127.0.0.1:8000/api/health') => {
+export const checkServerConnection = async (serverUrl = 'http://najshajs.mywire.org:8543/api/health') => {
   try {
     const response = await fetch(serverUrl, {
       method: 'GET',
