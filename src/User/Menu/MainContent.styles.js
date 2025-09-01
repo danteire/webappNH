@@ -1,6 +1,5 @@
 import styled, { keyframes } from 'styled-components';
 
-// Animacje
 export const spin = keyframes`
   from {
     transform: rotate(0deg);
@@ -10,7 +9,17 @@ export const spin = keyframes`
   }
 `;
 
-// Główne kontenery
+export const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
 export const MainContainer = styled.main`
   flex-grow: 1;
   padding: 20px;
@@ -52,7 +61,6 @@ export const ContentWrapper = styled.div`
   justify-content: flex-start;
 `;
 
-// Typografia
 export const Title = styled.h3`
   color: #E0E0E0;
   margin-bottom: 20px;
@@ -60,7 +68,6 @@ export const Title = styled.h3`
   font-size: 35px;
 `;
 
-// Upload komponenty
 export const UploadBox = styled.label`
   width: 350px;
   height: 180px;
@@ -102,7 +109,6 @@ export const UploadFooter = styled.div`
   }
 `;
 
-// Przyciski
 export const UploadButton = styled.button`
   margin-top: 40px;
   padding: 10px 20px;
@@ -144,18 +150,12 @@ export const ClearStorageButton = styled.button`
   }
 `;
 
-// Komunikaty
-export const ErrorMessage = styled.p`
-  color: #ff6b6b;
-  margin-top: 20px;
-  font-weight: 500;
-`;
-
 export const WarningMessage = styled.p`
   color: #ffa500;
   margin-top: 10px;
   font-weight: 500;
   font-size: 0.9rem;
+  text-align: center;
 `;
 
 export const FileName = styled.p`
@@ -171,7 +171,37 @@ export const StorageInfo = styled.div`
   text-align: center;
 `;
 
-// Szczegóły
+export const AlertBox = styled.div`
+  position: absolute; /* Zmieniono z 'fixed' na 'absolute' */
+  top: 0; /* Zmieniono z 20px, aby był na samej górze */
+  left: 50%; 
+  transform: translateX(-50%);
+  padding: 15px 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  animation: ${fadeIn} 0.5s ease-out;
+  color: white;
+  font-weight: bold;
+  font-size: 0.95rem;
+  text-align: center;
+  min-width: 250px;
+  max-width: 90%;
+  
+  background-color: ${props => {
+    switch(props.type) {
+      case 'success':
+        return '#4CAF50';
+      case 'error':
+        return '#ff6b6b';
+      case 'warning':
+        return '#ffa500';
+      default:
+        return '#444';
+    }
+  }};
+`;
+
 export const DetailsContainer = styled.div`
   width: 100%;
   display: flex;
@@ -201,7 +231,6 @@ export const DetailText = styled.p`
   }
 `;
 
-// Loading
 export const LoadingContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -216,7 +245,6 @@ export const LoadingSpinner = styled.div`
   margin: 50px auto;
 `;
 
-// Tooltip
 export const Tooltip = styled.div`
   position: absolute;
   background-color: #2A2A2E;
@@ -270,7 +298,6 @@ export const TooltipText = styled.div`
   }
 `;
 
-// Kolory i zmienne (opcjonalne)
 export const colors = {
   background: '#1A1A1D',
   surface: '#2A2A2E',
@@ -282,7 +309,8 @@ export const colors = {
   textMuted: '#888',
   accent: '#7FB3D3',
   error: '#ff6b6b',
-  warning: '#ffa500'
+  warning: '#ffa500',
+  success: '#32CD32'
 };
 
 export const spacing = {
@@ -293,3 +321,43 @@ export const spacing = {
   xl: '20px',
   xxl: '40px'
 };
+
+export const UserMenuContainer = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+`;
+
+export const DropdownMenu = styled.div`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #2A2A2E; 
+  border: 1px solid #4A4A52;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  width: 160px;
+  margin-top: 8px;
+  overflow: hidden;
+`;
+
+export const DropdownItem = styled.div`
+  padding: 10px 15px;
+  color: #E0E0E0;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #3A3A40; 
+  }
+
+  svg {
+    font-size: 1.1rem;
+    color: #B0B0B0;
+  }
+`;

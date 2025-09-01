@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiUpload, FiSearch, FiUser, FiLoader } from 'react-icons/fi';
+import { FiUpload, FiUser, FiLoader, FiLogOut } from 'react-icons/fi';
 import HistoryPanel from './History/HistoryPage';
+
 import {
   MainContainer,
   LeftColumn,
   RightColumn,
   TopBar,
+  UserMenuContainer,
+  DropdownMenu,
+  DropdownItem,
   ContentWrapper,
   Title,
   UploadBox,
@@ -14,8 +18,6 @@ import {
   UploadFooter,
   UploadButton,
   BackButton,
-  ErrorMessage,
-  WarningMessage,
   FileName,
   StorageInfo,
   ClearStorageButton,
@@ -25,10 +27,11 @@ import {
   LoadingContainer,
   Tooltip,
   TooltipImage,
-  TooltipText
+  TooltipText,
+  AlertBox,
+  WarningMessage
 } from './MainContent.styles';
 
-// Import funkcji obsługi historii
 import {
   checkStorageQuota,
   loadHistory,
@@ -38,37 +41,31 @@ import {
   clearAllHistory
 } from './History/HistoryUtils';
 
-// Import funkcji obsługi uploadu
 import {
   handleImageUpload,
   validateFile
 } from './uploadutils';
 
 const MainContent = ({ userId }) => {
-  // Stan komponentu
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState(null);
-  const [warning, setWarning] = useState(null);
+  const [alert, setAlert] = useState(null);
   const navigate = useNavigate();
-  
-  // Historia
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [history, setHistory] = useState([]);
-  
-  // Szczegóły
   const [selectedDetails, setSelectedDetails] = useState(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
-  
-  // Tooltip hover
   const [hoveredItem, setHoveredItem] = useState(null);
   const [hoveredItemDetails, setHoveredItemDetails] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [isLoadingTooltip, setIsLoadingTooltip] = useState(false);
-  
-  // Storage info
   const [storageInfo, setStorageInfo] = useState(null);
 
-  // Sprawdź storage przy załadowaniu
+  const handleLogout = () => {
+    console.log("Wylogowano...");
+    navigate('/');
+  };
+
   useEffect(() => {
     if (!userId) {
       const info = checkStorageQuota();
@@ -76,21 +73,28 @@ const MainContent = ({ userId }) => {
     }
   }, [userId]);
 
-  // Ładowanie historii
   useEffect(() => {
     const loadHistoryData = async () => {
       const result = await loadHistory(userId);
       if (result.success) {
         setHistory(result.history);
       } else {
-        setError(result.error);
+        setAlert({ message: result.error, type: 'error' });
       }
     };
     
     loadHistoryData();
   }, [userId]);
 
-  // Funkcja czyszczenia całego storage
+  useEffect(() => {
+    if (alert) {
+      const timer = setTimeout(() => {
+        setAlert(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [alert]);
+
   const handleClearStorage = () => {
     if (window.confirm('Czy na pewno chcesz usunąć całą historię? Ta operacja jest nieodwracalna.')) {
       const result = clearAllHistory();
@@ -100,15 +104,13 @@ const MainContent = ({ userId }) => {
         setHoveredItem(null);
         setHoveredItemDetails(null);
         setStorageInfo(checkStorageQuota());
-        setError(null);
-        setWarning(null);
+        setAlert({ message: 'Cała historia została wyczyszczona.', type: 'success' });
       } else {
-        setError(result.error);
+        setAlert({ message: result.error, type: 'error' });
       }
     }
   };
 
-  // Usuwanie z historii
   const removeHistoryItem = async (index) => {
     const itemToRemoveId = history[index];
     
@@ -117,7 +119,6 @@ const MainContent = ({ userId }) => {
     if (result.success) {
       setHistory(result.newHistory);
       
-      // Reset stanów jeśli usunięto aktualnie wyświetlany element
       if (selectedDetails && selectedDetails.id === itemToRemoveId) {
         setSelectedDetails(null);
       }
@@ -126,89 +127,89 @@ const MainContent = ({ userId }) => {
         setHoveredItemDetails(null);
       }
       
-      // Odśwież info o storage dla gości
       if (!userId) {
         setStorageInfo(checkStorageQuota());
       }
+      setAlert({ message: 'Element został usunięty z historii.', type: 'success' });
     } else {
-      setError(result.error);
+      setAlert({ message: result.error, type: 'error' });
     }
   };
 
-  // Obsługa zmiany pliku
   const handleFileChange = useCallback((event) => {
     const file = event.target.files[0];
     
+    setSelectedFile(null);
+    setAlert(null);
+
     if (file) {
       const validation = validateFile(file);
       if (!validation.isValid) {
-        setError(validation.errors.join(' '));
+        setAlert({ message: validation.errors.join(' '), type: 'error' });
         return;
       }
+      
+      setSelectedFile(file);
+      setAlert({ message: 'Plik został poprawnie wybrany.', type: 'success' }); 
+    } else {
+      setAlert({ message: 'Wybór pliku został anulowany.', type: 'error' });
     }
-    
-    setSelectedFile(file);
-    setError(null);
-    setWarning(null);
   }, []);
 
-  // Upload pliku
   const handleUpload = async () => {
     if (!selectedFile) {
-      setError('Proszę wybrać plik.');
+      setAlert({ message: 'Proszę wybrać plik.', type: 'error' });
       return;
     }
     
     setUploading(true);
-    setError(null);
-    setWarning(null);
+    setAlert(null);
 
     const result = await handleImageUpload(selectedFile, userId, history, navigate);
+    
+    setUploading(false);
     
     if (result.success) {
       if (result.newHistory) {
         setHistory(result.newHistory);
       }
+      setSelectedFile(null);
       if (result.warning) {
-        setWarning(result.warning);
+        setAlert({ message: result.warning, type: 'warning' });
+      } else {
+        setAlert({ message: 'Plik został pomyślnie wysłany!', type: 'success' });
       }
-      // navigate jest wywołane w handleImageUpload
     } else {
-      setError(result.errors.join(' '));
+      setAlert({ message: result.errors.join(' '), type: 'error' });
     }
-    
-    setUploading(false);
   };
 
-  // Kliknięcie w element historii
   const handleHistoryItemClick = async (itemId) => {
     setIsLoadingDetails(true);
-    setError(null);
+    setAlert(null);
     setSelectedDetails(null);
 
     const result = await getItemDetails(itemId, userId);
     
     if (result.success) {
-      // Symulujemy opóźnienie dla lepszego UX
       if (!userId) {
         await new Promise(resolve => setTimeout(resolve, 300));
       }
       setSelectedDetails(result.details);
+      setAlert({ message: 'Szczegóły banknotu zostały wczytane.', type: 'success' });
     } else {
-      setError(result.error);
+      setAlert({ message: result.error, type: 'error' });
     }
     
     setIsLoadingDetails(false);
   };
 
-  // Hover na elemencie historii
   const handleHistoryItemHover = async (itemId, event) => {
     if (hoveredItem === itemId || isLoadingTooltip) return;
     
     setIsLoadingTooltip(true);
     setHoveredItem(itemId);
     
-    // Pozycja tooltip
     const rect = event.currentTarget.getBoundingClientRect();
     setTooltipPosition({
       x: rect.right + 10,
@@ -226,14 +227,12 @@ const MainContent = ({ userId }) => {
     setIsLoadingTooltip(false);
   };
 
-  // Opuszczenie elementu historii
   const handleHistoryItemLeave = () => {
     setHoveredItem(null);
     setHoveredItemDetails(null);
     setIsLoadingTooltip(false);
   };
 
-  // Renderowanie zawartości prawej kolumny
   const renderRightColumnContent = () => {
     if (isLoadingDetails) {
       return (
@@ -259,7 +258,7 @@ const MainContent = ({ userId }) => {
               Data: <span>{new Date(selectedDetails.date).toLocaleDateString('pl-PL')}</span>
             </DetailText>
           )}
-          <BackButton onClick={() => setSelectedDetails(null)}>
+          <BackButton onClick={() => { setSelectedDetails(null); setAlert(null); }}>
             Powrót
           </BackButton>
         </DetailsContainer>
@@ -276,10 +275,7 @@ const MainContent = ({ userId }) => {
         </UploadBox>
         
         {selectedFile && <FileName>Wybrany plik: {selectedFile.name}</FileName>}
-        {error && <ErrorMessage>{error}</ErrorMessage>}
-        {warning && <WarningMessage>{warning}</WarningMessage>}
         
-        {/* Informacje o storage dla gości */}
         {!userId && storageInfo && (
           <StorageInfo>
             Wykorzystano: {storageInfo.used}KB / ~5MB
@@ -304,46 +300,61 @@ const MainContent = ({ userId }) => {
   };
 
   return (
-    <MainContainer>
-      <LeftColumn>
-        <HistoryPanel 
-          history={history} 
-          onRemove={removeHistoryItem}
-          onClickItem={handleHistoryItemClick}
-          onHoverItem={handleHistoryItemHover}
-          onLeaveItem={handleHistoryItemLeave}
-        />
-      </LeftColumn>
-      <RightColumn>
-        <TopBar>
-          <FiSearch />
-          <FiUser />
-        </TopBar>
-        {renderRightColumnContent()}
-      </RightColumn>
-      
-      {/* Tooltip dla hover */}
-      <Tooltip 
-        visible={hoveredItem && hoveredItemDetails && !isLoadingTooltip}
-        style={{
-          left: tooltipPosition.x,
-          top: tooltipPosition.y
-        }}
-      >
-        {hoveredItemDetails && (
-          <>
-            <TooltipImage 
-              src={`data:image/jpeg;base64,${hoveredItemDetails.imageBase64}`}
-              alt="Podgląd banknotu"
-            />
-            <TooltipText>
-              <div className="banknote">{hoveredItemDetails.predictedBanknote}</div>
-              <div className="date">{hoveredItemDetails.date}</div>
-            </TooltipText>
-          </>
-        )}
-      </Tooltip>
-    </MainContainer>
+    <>
+      {alert && (
+        <AlertBox type={alert.type}>
+          {alert.message}
+        </AlertBox>
+      )}
+      <MainContainer>
+        <LeftColumn>
+          <HistoryPanel 
+            history={history} 
+            onRemove={removeHistoryItem}
+            onClickItem={handleHistoryItemClick}
+            onHoverItem={handleHistoryItemHover}
+            onLeaveItem={handleHistoryItemLeave}
+          />
+        </LeftColumn>
+        <RightColumn>
+          <TopBar>
+            <UserMenuContainer>
+              <FiUser onClick={() => setIsMenuOpen(!isMenuOpen)} />
+              {isMenuOpen && (
+                <DropdownMenu>
+                  <DropdownItem onClick={handleLogout}>
+                    <FiLogOut />
+                    Wyloguj się
+                  </DropdownItem>
+                </DropdownMenu>
+              )}
+            </UserMenuContainer>
+          </TopBar>
+          {renderRightColumnContent()}
+        </RightColumn>
+        
+        <Tooltip 
+          visible={hoveredItem && hoveredItemDetails && !isLoadingTooltip}
+          style={{
+            left: tooltipPosition.x,
+            top: tooltipPosition.y
+          }}
+        >
+          {hoveredItemDetails && (
+            <>
+              <TooltipImage 
+                src={`data:image/jpeg;base64,${hoveredItemDetails.imageBase64}`}
+                alt="Podgląd banknotu"
+              />
+              <TooltipText>
+                <div className="banknote">{hoveredItemDetails.predictedBanknote}</div>
+                <div className="date">{hoveredItemDetails.date}</div>
+              </TooltipText>
+            </>
+          )}
+        </Tooltip>
+      </MainContainer>
+    </>
   );
 };
 
