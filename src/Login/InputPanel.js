@@ -8,8 +8,11 @@ export default function LoginPanel() {
 
   const handleLogin = () => {
       console.log("Logowanie:", { username, password });
-      navigate('/user');
-    
+      if(username === "admin"){
+        navigate('/admin');
+      }else{
+        navigate('/user');
+      }
   };
 
   const handleRegister = () => {
