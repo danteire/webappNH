@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import GlobalStyles from '../components/GlobalStyles';
-import Dashboard from './Dashboard';
+import Dashboard from './Dashboard/Dashboard';
 
 const AppContainer = styled.div`
   display: flex;
