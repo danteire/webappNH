@@ -90,3 +90,14 @@ export const CardValue = styled.p`
   margin: 0;
   color: #E0E0E0;
 `;
+export const AppContainer = styled.div`
+  display: flex;
+  width: 1200px;
+  height: 700px;
+  background-color: #1A1A1D;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  align-items: center;
+  justify-content: center;
+`;

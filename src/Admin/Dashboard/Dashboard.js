@@ -1,6 +1,8 @@
 // src/Admin/Dashboard.js
 import React, { useState, useEffect } from "react";
 import { FaBell, FaUserCircle, FaDatabase, FaFlag, FaCogs } from "react-icons/fa";
+import { useNavigate } from 'react-router-dom';
+
 import {
   MainContainer,
   RightColumn,
@@ -23,6 +25,9 @@ const Dashboard = () => {
   const [data, setData] = useState(DEFAULT_DATA);
   const [isLoading, setIsLoading] = useState(true);
   const [serverError, setServerError] = useState(false);
+  const navigate = useNavigate();
+
+  
 
   useEffect(() => {
     const controller = new AbortController();
@@ -53,7 +58,7 @@ const Dashboard = () => {
   }, []);
 
   const handleCardClick = (moduleName) => {
-    alert(`Przejście do modułu: ${moduleName}`);
+    navigate(`/admin/${moduleName}`);
   };
 
   if (isLoading) {
@@ -75,25 +80,30 @@ const Dashboard = () => {
         <Title>Panel Administratora – Dashboard</Title>
 
         <Grid>
-          <Card onClick={() => handleCardClick("Użytkownicy")}>
+          <Card onClick={() => {
+            handleCardClick("userlist");
+          }
+          }>
             <FaUserCircle />
             <CardTitle>Liczba użytkowników</CardTitle>
             <CardValue>{data.usersCount}</CardValue>
           </Card>
 
-          <Card onClick={() => handleCardClick("Kraje")}>
+          <Card onClick={() =>{
+            handleCardClick("banknotelist");
+          }}>
             <FaFlag />
-            <CardTitle>Kraje w systemie</CardTitle>
+            <CardTitle>Banknoty w Bazie Danych</CardTitle>
             <CardValue>{data.countryCount}</CardValue>
           </Card>
 
-          <Card onClick={() => handleCardClick("Historia")}>
+          <Card onClick={() => handleCardClick("history")}>
             <FaDatabase />
-            <CardTitle>Ostatnio dodane</CardTitle>
+            <CardTitle>Suma przetworzeń w Historii</CardTitle>
             <CardValue>{data.historyCount} {data.historyCount !== 0 ? "rekordów" : ""}</CardValue>
           </Card>
 
-          <Card onClick={() => handleCardClick("Status Serwera")}>
+          <Card>
             <FaCogs />
             <CardTitle>Status systemu</CardTitle>
             <CardValue>{data.serverStatus}</CardValue>

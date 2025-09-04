@@ -3,6 +3,9 @@ import ResultsPage from './User/Result/ResultPage';
 import UserPage from "./User/UserPage";
 import LoginPage from './Login/LoginPage';
 import AdminPage from './Admin/AdminPage';
+import UserListPage from './Admin/UserList/UserListPage'
+import BanknoteListPage from './Admin/BanknoteList/BanknoteListPage'
+
 function App() {
   return (
       <Router>
@@ -13,6 +16,9 @@ function App() {
             <Route path="/" element={<LoginPage />} />
             <Route path="/user" element={<UserPage/>} />
             <Route path="/admin" element={<AdminPage/>} />
+            <Route path="/admin/userlist" element={< UserListPage/>} />
+            <Route path="/admin/banknotelist" element={< BanknoteListPage/>} />
+
           </Routes>
         </div>
       </Router>
