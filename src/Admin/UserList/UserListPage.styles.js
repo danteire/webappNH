@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { media } from './breakpoints.js';
 
 // Istniejące style
 export const LoadingOrError = styled.div`
@@ -13,6 +14,14 @@ export const TableWrapper = styled.div`
   margin-top: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  
+  ${media.tablet} {
+    margin-top: 15px;
+  }
+  
+  ${media.mobile} {
+    margin-top: 10px;
+  }
 `;
 
 export const StyledTable = styled.table`
@@ -32,6 +41,21 @@ export const TableHeader = styled.th`
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  
+  ${media.tablet} {
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+  
+  ${media.mobile} {
+    padding: 10px 6px;
+    font-size: 12px;
+  }
+  
+  @media (max-width: 360px) {
+    padding: 8px 4px;
+    font-size: 11px;
+  }
 `;
 
 export const TableRow = styled.tr`
@@ -48,188 +72,189 @@ export const TableRow = styled.tr`
 export const TableCell = styled.td`
   padding: 12px;
   border-bottom: 1px solid #424950ff;
+  color: #e0e0e0;
   font-size: 14px;
-  color: #c5d0dbff;
+  
+  ${media.tablet} {
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+  
+  ${media.mobile} {
+    padding: 8px 6px;
+    font-size: 12px;
+  }
+  
+  @media (max-width: 360px) {
+    padding: 6px 4px;
+    font-size: 11px;
+  }
 `;
 
 export const StatusIndicator = styled.span`
-  background: ${props => props.active 
-    ? 'linear-gradient(135deg, #f39c12, #e67e22)' 
-    : 'linear-gradient(135deg, #95a5a6, #7f8c8d)'
-  };
-  color: white;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 11px;
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-`;
-
-export const AdminToggleButton = styled.button`
-  background: ${props => props.isAdmin 
-    ? 'linear-gradient(135deg, #ff6b6b, #ee5a24)' 
-    : 'linear-gradient(135deg, #4ecdc4, #44a08d)'
-  };
+  background-color: ${props => props.active ? '#4CAF50' : '#FF9800'};
   color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
-  margin-right: 8px;
-  min-width: 100px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-
-  &:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    background: ${props => props.isAdmin 
-      ? 'linear-gradient(135deg, #ee5a24, #ff6b6b)' 
-      : 'linear-gradient(135deg, #44a08d, #4ecdc4)'
-    };
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-
-  &:disabled {
-    background: #95a5a6;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
 `;
 
-export const ActionCell = styled(TableCell)`
+export const ActionCell = styled.td`
+  padding: 12px;
+  border-bottom: 1px solid #424950ff;
   display: flex;
   gap: 8px;
   align-items: center;
-  justify-content: flex-start;
-  min-width: 200px;
 `;
 
 export const DeleteButton = styled.button`
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  background: linear-gradient(135deg, #ff6b6b, #ee5a52);
   color: white;
   border: none;
-  padding: 8px 12px;
+  padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 12px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-
-  &:hover:not(:disabled) {
-    background: linear-gradient(135deg, #c0392b, #e74c3c);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-
-  &:disabled {
-    background: #95a5a6;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-`;
-
-export const SuccessMessage = styled.div`
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
-  color: white;
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(46, 204, 113, 0.3);
-  animation: slideIn 0.3s ease-out;
-
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-`;
-
-export const ErrorMessage = styled.div`
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
-  color: white;
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
-  animation: slideIn 0.3s ease-out;
-
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-`;
-
-export const AddUserButton = styled.button`
-  background: linear-gradient(135deg, #3498db, #2980b9);
-  color: #2b333aff;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
   font-weight: 600;
-  margin-top: 20px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
-  width: 100%;
-  max-width: 300px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 
   &:hover {
-    background: linear-gradient(135deg, #2980b9, #3498db);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4);
+    background: linear-gradient(135deg, #ff5252, #e53935);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(255, 107, 107, 0.3);
   }
 
   &:active {
     transform: translateY(0);
-    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  ${media.mobile} {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+  
+  @media (max-width: 360px) {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+`;
+
+export const AdminToggleButton = styled.button`
+  background: ${props => props.isAdmin 
+    ? 'linear-gradient(135deg, #ff9800, #f57c00)' 
+    : 'linear-gradient(135deg, #4CAF50, #388e3c)'
+  };
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  &:hover {
+    background: ${props => props.isAdmin 
+      ? 'linear-gradient(135deg, #f57c00, #ef6c00)' 
+      : 'linear-gradient(135deg, #388e3c, #2e7d32)'
+    };
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  ${media.mobile} {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+  
+  @media (max-width: 360px) {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+`;
+
+export const SuccessMessage = styled.div`
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin: 16px 0;
+  font-weight: 600;
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+`;
+
+export const ErrorMessage = styled.div`
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin: 16px 0;
+  font-weight: 600;
+  box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+`;
+
+export const AddUserButton = styled.button`
+  background: linear-gradient(135deg, #2196F3, #1976D2);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 20px 0;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &:hover {
+    background: linear-gradient(135deg, #1976D2, #1565C0);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(33, 150, 243, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 `;
 
 export const AddUserForm = styled.form`
-  background: linear-gradient(135deg, #1e242bff, #2b333aff);
-  border: 2px solid #dee2e6;
-  border-radius: 12px;
+  background: #2b333aff;
   padding: 24px;
-  margin-top: 20px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  
+  border-radius: 12px;
+  margin: 20px 0;
+  border: 1px solid #424950ff;
+
   h3 {
-    margin: 0 0 20px 0;
-    color: #dee2e6;
-    font-size: 20px;
-    font-weight: 600;
-    text-align: center;
+    color: #e0e0e0;
+    margin-bottom: 20px;
+    font-size: 18px;
   }
 `;
 
@@ -239,103 +264,92 @@ export const FormGroup = styled.div`
 
 export const FormLabel = styled.label`
   display: block;
-  margin-bottom: 6px;
-  color: #dee2e6;
-  font-weight: 500;
+  color: #e0e0e0;
+  margin-bottom: 8px;
+  font-weight: 600;
   font-size: 14px;
 `;
 
 export const FormInput = styled.input`
   width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #dee2e6;
-  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid #424950ff;
+  border-radius: 6px;
+  background: #1e242bff;
+  color: #e0e0e0;
   font-size: 14px;
-  transition: all 0.3s ease;
-  background: white;
-  box-sizing: border-box;
-  
+  transition: border-color 0.2s ease;
+
   &:focus {
     outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
   }
-  
+
   &:disabled {
-    background: #f8f9fa;
-    cursor: not-allowed;
     opacity: 0.6;
-  }
-  
-  &::placeholder {
-    color: #3f586dff;
+    cursor: not-allowed;
   }
 `;
 
 export const FormCheckbox = styled.input`
   margin-right: 8px;
   transform: scale(1.2);
-  cursor: pointer;
-  
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
 `;
 
 export const CheckboxLabel = styled.label`
   display: flex;
   align-items: center;
-  color: #bdc3c7;
-  font-weight: 500;
+  color: #e0e0e0;
+  font-size: 14px;
   cursor: pointer;
-  
-  &:hover {
-    color: #3498db;
-  }
 `;
 
 export const FormActions = styled.div`
   display: flex;
   gap: 12px;
-  justify-content: center;
-  margin-top: 24px;
+  margin-top: 20px;
 `;
 
 export const FormButton = styled.button`
-  background: ${props => props.primary 
-    ? 'linear-gradient(135deg, #27ae60, #2ecc71)' 
-    : 'linear-gradient(135deg, #95a5a6, #7f8c8d)'
-  };
-  color: white;
+  padding: 12px 24px;
   border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  min-width: 140px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 
-  &:hover:not(:disabled) {
-    background: ${props => props.primary 
-      ? 'linear-gradient(135deg, #2ecc71, #27ae60)' 
-      : 'linear-gradient(135deg, #7f8c8d, #95a5a6)'
-    };
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  }
+  ${props => props.primary ? `
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    
+    &:hover {
+      background: linear-gradient(135deg, #45a049, #388e3c);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+    }
+  ` : `
+    background: #424950ff;
+    color: #e0e0e0;
+    
+    &:hover {
+      background: #4c5c68ff;
+      transform: translateY(-1px);
+    }
+  `}
 
-  &:active:not(:disabled) {
+  &:active {
     transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   }
 
   &:disabled {
-    background: #bdc3c7;
+    opacity: 0.6;
     cursor: not-allowed;
     transform: none;
-    box-shadow: none;
   }
 `;
+

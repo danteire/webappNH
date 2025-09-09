@@ -1,4 +1,6 @@
 // historyUtils.js - Funkcje do zarządzania historią
+import authService from '../../../services/authService';
+import { mapBanknoteName } from '../../../utils/banknoteMapper';
 
 // Funkcja sprawdzania rozmiaru localStorage
 export const checkStorageQuota = () => {
@@ -42,9 +44,9 @@ export const cleanOldEntries = (maxEntries = 20) => {
 
 // Funkcja pobierania historii
 export const loadHistory = async (userId) => {
-  if (userId) {
+  if (userId && authService.isAuthenticated()) {
     try {
-      const response = await fetch(`/api/history/${userId}`);
+      const response = await authService.authenticatedRequest('/api/history');
       if (!response.ok) throw new Error('Błąd pobierania historii z serwera');
       const data = await response.json();
       return { success: true, history: data };
@@ -65,9 +67,9 @@ export const loadHistory = async (userId) => {
 
 // Funkcja usuwania wpisu z historii
 export const removeFromHistory = async (itemId, index, userId, currentHistory) => {
-  if (userId) {
+  if (userId && authService.isAuthenticated()) {
     try {
-      const response = await fetch(`/api/history/${userId}/${itemId}`, {
+      const response = await authService.authenticatedRequest(`/api/history/${itemId}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Błąd serwera podczas usuwania wpisu.');
@@ -98,12 +100,24 @@ export const removeFromHistory = async (itemId, index, userId, currentHistory) =
 
 // Funkcja pobierania szczegółów wpisu
 export const getItemDetails = async (itemId, userId) => {
-  if (userId) {
+  if (userId && authService.isAuthenticated()) {
     try {
-      const response = await fetch(`/api/results/${itemId}`);
+      const response = await authService.authenticatedRequest(`/api/history/${itemId}/details`);
       if (!response.ok) throw new Error('Nie udało się pobrać szczegółów.');
       const data = await response.json();
-      return { success: true, details: data };
+      
+      // Przekształć dane z bazy na format oczekiwany przez frontend
+      const details = {
+        id: data.id,
+        predictedBanknote: mapBanknoteName(data.knn_pred || data.rf_pred || data.svm_pred || 'NONOTE0'),
+        date: data.timestamp,
+        knn_pred: mapBanknoteName(data.knn_pred),
+        rf_pred: mapBanknoteName(data.rf_pred),
+        svm_pred: mapBanknoteName(data.svm_pred),
+        image: data.image ? `https://najshajs.mywire.org/${data.image}` : null  // Dodaj domenę do ścieżki
+      };
+      
+      return { success: true, details };
     } catch (err) {
       return { success: false, error: err.message };
     }
@@ -125,12 +139,24 @@ export const getItemDetails = async (itemId, userId) => {
 
 // Funkcja pobierania podglądu dla tooltip
 export const getItemPreview = async (itemId, userId) => {
-  if (userId) {
+  if (userId && authService.isAuthenticated()) {
     try {
-      const response = await fetch(`/api/results/${itemId}/preview`);
+      const response = await authService.authenticatedRequest(`/api/history/${itemId}/details`);
       if (!response.ok) throw new Error('Nie udało się pobrać podglądu.');
       const data = await response.json();
-      return { success: true, preview: data };
+      
+      // Przekształć dane na format podglądu
+      const preview = {
+        id: data.id,
+        predictedBanknote: mapBanknoteName(data.knn_pred || data.rf_pred || data.svm_pred || 'NONOTE0'),
+        date: new Date(data.timestamp).toLocaleDateString('pl-PL'),
+        knn_pred: mapBanknoteName(data.knn_pred),
+        rf_pred: mapBanknoteName(data.rf_pred),
+        svm_pred: mapBanknoteName(data.svm_pred),
+        image: data.image ? `https://najshajs.mywire.org/${data.image}` : null  // Dodaj domenę do ścieżki
+      };
+      
+      return { success: true, preview };
     } catch (err) {
       return { success: false, error: err.message };
     }

@@ -6,6 +6,7 @@ import {
   Title,
 } from "../Dashboard/Dashboard.styles";
 import GlobalStyles from '../../components/GlobalStyles';
+import authService from '../../services/authService';
 
 import { FaUserCircle } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
@@ -34,8 +35,6 @@ import {
   CheckboxLabel
 } from './UserListPage.styles'
 
-// --- GŁÓWNY KOMPONENT ---
-
 const UserListPage = () => {
   const navigate = useNavigate();
 
@@ -44,7 +43,7 @@ const UserListPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
-  const [updatingUsers, setUpdatingUsers] = useState(new Set()); // Śledzenie użytkowników w trakcie aktualizacji
+  const [updatingUsers, setUpdatingUsers] = useState(new Set());
   const [showAddUserForm, setShowAddUserForm] = useState(false);
   const [newUser, setNewUser] = useState({
     username: '',
@@ -57,7 +56,7 @@ const UserListPage = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch('http://localhost:8000/admin/users');
+        const response = await authService.authenticatedRequest('/api/admin/users');
         
         if (!response.ok) {
           throw new Error(`Błąd HTTP! Status: ${response.status}`);
@@ -79,7 +78,6 @@ const UserListPage = () => {
   // Funkcja do przełączania uprawnień administratora
   const handleAdminToggle = async (userID, currentAdminStatus) => {
     const newAdminStatus = !currentAdminStatus;
-    const action = newAdminStatus ? 'nadanie' : 'odebranie';
     
     if (!window.confirm(`Czy na pewno chcesz ${newAdminStatus ? 'nadać' : 'odebrać'} uprawnienia administratora użytkownikowi o ID ${userID}?`)) {
       return;
@@ -89,14 +87,8 @@ const UserListPage = () => {
     setUpdatingUsers(prev => new Set(prev).add(userID));
 
     try {
-      const response = await fetch(`http://localhost:8000/admin/users/${userID}/admin`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          admin: newAdminStatus
-        })
+      const response = await authService.authenticatedRequest(`/api/admin/users/${userID}/admin`, {
+        method: 'PUT'
       });
 
       if (!response.ok) {
@@ -104,14 +96,7 @@ const UserListPage = () => {
         
         try {
           const errorData = await response.json();
-          
-          if (response.status === 404) {
-            errorMessage = 'Użytkownik nie został znaleziony';
-          } else if (response.status === 403) {
-            errorMessage = 'Brak uprawnień do wykonania tej operacji';
-          } else {
-            errorMessage = errorData.detail || errorMessage;
-          }
+          errorMessage = errorData.detail || errorMessage;
         } catch {
           // Jeśli nie da się sparsować JSON, użyj ogólnego komunikatu
         }
@@ -174,12 +159,15 @@ const UserListPage = () => {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:8000/admin/users', {
+      const response = await authService.authenticatedRequest('/api/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newUser)
+        body: JSON.stringify({
+          username: newUser.username,
+          password: newUser.password
+        })
       });
 
       if (!response.ok) {
@@ -187,14 +175,7 @@ const UserListPage = () => {
         
         try {
           const errorData = await response.json();
-          
-          if (response.status === 400) {
-            errorMessage = errorData.detail || 'Błędne dane użytkownika';
-          } else if (response.status === 409) {
-            errorMessage = 'Użytkownik o tej nazwie już istnieje';
-          } else {
-            errorMessage = errorData.detail || errorMessage;
-          }
+          errorMessage = errorData.detail || errorMessage;
         } catch {
           // Jeśli nie da się sparsować JSON, użyj ogólnego komunikatu
         }
@@ -216,7 +197,7 @@ const UserListPage = () => {
       setShowAddUserForm(false);
       
       // Pokaż komunikat o sukcesie
-      setSuccessMessage(`Użytkownik '${createdUser.username}' został pomyślnie utworzony ${createdUser.admin ? 'z uprawnieniami administratora' : ''}`);
+      setSuccessMessage(`Użytkownik '${createdUser.username}' został pomyślnie utworzony`);
       setTimeout(() => setSuccessMessage(''), 5000);
       
     } catch (error) {
@@ -245,7 +226,7 @@ const UserListPage = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/admin/users/${userID}`, {
+      const response = await authService.authenticatedRequest(`/api/admin/users/${userID}`, {
         method: 'DELETE'
       });
 
@@ -254,16 +235,7 @@ const UserListPage = () => {
         
         try {
           const errorData = await response.json();
-          
-          if (response.status === 404) {
-            errorMessage = 'Użytkownik nie został znaleziony';
-          } else if (response.status === 409) {
-            errorMessage = 'Nie można usunąć użytkownika z powodu ograniczeń bazy danych';
-          } else if (response.status === 503) {
-            errorMessage = 'Baza danych jest niedostępna';
-          } else {
-            errorMessage = errorData.detail || errorMessage;
-          }
+          errorMessage = errorData.detail || errorMessage;
         } catch {
           // Jeśli nie da się sparsować JSON, użyj ogólnego komunikatu
         }
@@ -271,25 +243,11 @@ const UserListPage = () => {
         throw new Error(errorMessage);
       }
 
-      // Sprawdź odpowiedź serwera
-      let responseData = null;
-      if (response.status !== 204) {
-        try {
-          responseData = await response.json();
-        } catch {
-          // Ignoruj błąd parsowania dla pustej odpowiedzi
-        }
-      }
-
       // Usuń użytkownika z lokalnego stanu po udanym usunięciu
       setUsers(prevUsers => prevUsers.filter(user => user.id !== userID));
       
       // Pokaż komunikat o sukcesie
-      if (responseData && responseData.updated_history_records > 0) {
-        setSuccessMessage(`Użytkownik został usunięty. Zaktualizowano ${responseData.updated_history_records} rekordów historii.`);
-      } else {
-        setSuccessMessage(`Użytkownik o ID ${userID} został pomyślnie usunięty.`);
-      }
+      setSuccessMessage(`Użytkownik o ID ${userID} został pomyślnie usunięty.`);
       
       setError(null);
       setTimeout(() => setSuccessMessage(''), 5000);
@@ -316,7 +274,6 @@ const UserListPage = () => {
             <tr>
               <TableHeader>ID</TableHeader>
               <TableHeader>UserName</TableHeader>
-              <TableHeader>Password #</TableHeader>
               <TableHeader>Admin Privilege</TableHeader>
               <TableHeader>Creation Time</TableHeader>
               <TableHeader>Actions</TableHeader>
@@ -327,7 +284,6 @@ const UserListPage = () => {
               <TableRow key={user.id}>
                 <TableCell>{user.id}</TableCell>
                 <TableCell>{user.username}</TableCell>
-                <TableCell>{user.password}</TableCell>
                 <TableCell>
                   <StatusIndicator active={user.admin}>
                     {user.admin ? 'Admin' : 'User'}
@@ -429,18 +385,6 @@ const UserListPage = () => {
                 />
               </FormGroup>
 
-              <FormGroup>
-                <CheckboxLabel>
-                  <FormCheckbox
-                    type="checkbox"
-                    checked={newUser.admin}
-                    onChange={(e) => setNewUser(prev => ({...prev, admin: e.target.checked}))}
-                    disabled={isCreatingUser}
-                  />
-                  Nadaj uprawnienia administratora
-                </CheckboxLabel>
-              </FormGroup>
-
               <FormActions>
                 <FormButton 
                   type="submit" 
@@ -467,3 +411,4 @@ const UserListPage = () => {
 }
 
 export default UserListPage;
+

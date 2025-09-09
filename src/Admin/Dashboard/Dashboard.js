@@ -1,7 +1,9 @@
 // src/Admin/Dashboard.js
 import React, { useState, useEffect } from "react";
-import { FaBell, FaUserCircle, FaDatabase, FaFlag, FaCogs } from "react-icons/fa";
+import { FaUserCircle, FaDatabase, FaFlag, FaCogs } from "react-icons/fa";
+import { FiUser, FiLogOut, FiSettings, FiHome } from "react-icons/fi";
 import { useNavigate } from 'react-router-dom';
+import authService from '../../services/authService';
 
 import {
   MainContainer,
@@ -12,6 +14,11 @@ import {
   Card,
   CardTitle,
   CardValue,
+  ErrorMessage,
+  LoadingMessage,
+  UserMenuContainer,
+  DropdownMenu,
+  DropdownItem,
 } from "./Dashboard.styles";
 
 const DEFAULT_DATA = {
@@ -25,34 +32,39 @@ const Dashboard = () => {
   const [data, setData] = useState(DEFAULT_DATA);
   const [isLoading, setIsLoading] = useState(true);
   const [serverError, setServerError] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
-
-  
 
   useEffect(() => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-    fetch("http://localhost:8000/admin/dashboard", { signal: controller.signal })
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`Błąd serwera: ${res.status}`);
-        const json = await res.json();
-        setData({
-          usersCount: json.users_count,
-          countryCount: json.countries,
-          historyCount: json.history_count,
-          serverStatus: json.server_status
-        });
-      })
-      .catch((err) => {
+    // Użyj autoryzowanych endpointów z /api/
+    const fetchData = async () => {
+      try {
+        const response = await authService.authenticatedRequest('/api/admin/stats');
+        if (response.ok) {
+          const json = await response.json();
+          setData({
+            usersCount: json.total_users,
+            countryCount: json.total_banknotes, // Rzeczywista liczba banknotów z API
+            historyCount: json.total_history,
+            serverStatus: "on"
+          });
+        } else {
+          throw new Error(`Błąd serwera: ${response.status}`);
+        }
+      } catch (err) {
         console.warn("Błąd pobierania danych:", err.message);
         setData(DEFAULT_DATA);
         setServerError(true);
-      })
-      .finally(() => {
+      } finally {
         clearTimeout(timeoutId);
         setIsLoading(false);
-      });
+      }
+    };
+
+    fetchData();
 
     return () => clearTimeout(timeoutId);
   }, []);
@@ -61,10 +73,27 @@ const Dashboard = () => {
     navigate(`/admin/${moduleName}`);
   };
 
+  const handleLogout = () => {
+    authService.logout();
+    navigate('/');
+  };
+
+  const handleBackToUser = () => {
+    navigate('/user');
+  };
+
+  const handleMenuToggle = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleBackToApp = () => {
+    navigate('/user');
+  };
+
   if (isLoading) {
     return (
       <MainContainer>
-        <p style={{ color: "white", margin: "auto" }}>Ładowanie danych...</p>
+        <LoadingMessage>Ładowanie danych...</LoadingMessage>
       </MainContainer>
     );
   }
@@ -73,8 +102,21 @@ const Dashboard = () => {
     <MainContainer>
       <RightColumn>
         <TopBar>
-          <FaBell />
-          <FaUserCircle />
+          <UserMenuContainer>
+            <FiUser onClick={handleMenuToggle} />
+            {isMenuOpen && (
+              <DropdownMenu>
+                <DropdownItem onClick={handleBackToApp}>
+                  <FiHome />
+                  Powrót do aplikacji
+                </DropdownItem>
+                <DropdownItem onClick={handleLogout}>
+                  <FiLogOut />
+                  Wyloguj się
+                </DropdownItem>
+              </DropdownMenu>
+            )}
+          </UserMenuContainer>
         </TopBar>
 
         <Title>Panel Administratora – Dashboard</Title>
@@ -111,9 +153,9 @@ const Dashboard = () => {
         </Grid>
 
         {serverError && (
-          <p style={{ color: "orange", marginTop: "20px", textAlign: "center" }}>
+          <ErrorMessage>
             Brak połączenia z serwerem
-          </p>
+          </ErrorMessage>
         )}
       </RightColumn>
     </MainContainer>

@@ -1,6 +1,6 @@
 import styled, { keyframes } from 'styled-components';
+import { media, breakpoints } from './breakpoints.js';
 
-// Animacje
 export const spin = keyframes`
   from {
     transform: rotate(0deg);
@@ -10,24 +10,118 @@ export const spin = keyframes`
   }
 `;
 
-// Główne kontenery
+export const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
 export const MainContainer = styled.main`
   flex-grow: 1;
   padding: 20px;
   background-color: #1A1A1D;
   display: flex;
   position: relative;
+  min-height: 100vh;
+  width: 100%;
+  
+  ${media.tablet} {
+    padding: 15px;
+    flex-direction: row;
+    min-height: auto;
+  }
+  
+  ${media.mobile} {
+    padding: 10px;
+    flex-direction: column;
+    min-height: auto;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 8px;
+    flex-direction: column;
+  }
+  
+  @media (max-width: 360px) {
+    padding: 5px;
+    flex-direction: column;
+  }
 `;
 
 export const LeftColumn = styled.div`
   width: 300px;
   margin-right: 20px;
+  height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  
+  ${media.tablet} {
+    width: 280px;
+    height: calc(100vh - 30px);
+    margin-right: 15px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+  
+  ${media.mobile} {
+    width: 100%;
+    height: auto;
+    max-height: 250px;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-top: 15px;
+    order: 2;
+  }
+  
+  @media (max-width: 480px) {
+    width: 100%;
+    height: auto;
+    max-height: 220px;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-top: 10px;
+    order: 2;
+  }
+  
+  @media (max-width: 360px) {
+    width: 100%;
+    height: auto;
+    max-height: 200px;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-top: 8px;
+    order: 2;
+  }
 `;
 
 export const RightColumn = styled.div`
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  
+  ${media.tablet} {
+    min-height: calc(100vh - 30px);
+  }
+  
+  ${media.mobile} {
+    min-height: calc(100vh - 250px);
+    order: 1;
+  }
+  
+  @media (max-width: 480px) {
+    min-height: calc(100vh - 230px);
+    order: 1;
+  }
+  
+  @media (max-width: 360px) {
+    min-height: calc(100vh - 210px);
+    order: 1;
+  }
 `;
 
 export const TopBar = styled.div`
@@ -50,18 +144,25 @@ export const ContentWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding-top: 40px;
 `;
 
-// Typografia
 export const Title = styled.h3`
   color: #E0E0E0;
   margin-bottom: 20px;
   text-align: center;
   font-size: 35px;
+  
+  ${media.tablet} {
+    font-size: 28px;
+    margin-bottom: 15px;
+  }
+  
+  ${media.mobile} {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
 `;
 
-// Upload komponenty
 export const UploadBox = styled.label`
   width: 350px;
   height: 180px;
@@ -71,8 +172,6 @@ export const UploadBox = styled.label`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding-top: 30px;
   padding-bottom: 30px;
   cursor: pointer;
   transition: border-color 0.2s;
@@ -84,6 +183,20 @@ export const UploadBox = styled.label`
 
   input {
     display: none;
+  }
+  
+  ${media.tablet} {
+    width: 100%;
+    max-width: 500px;
+    height: 160px;
+    margin-top: 20px;
+  }
+  
+  ${media.mobile} {
+    width: 100%;
+    height: 140px;
+    margin-top: 15px;
+    padding-bottom: 20px;
   }
 `;
 
@@ -105,7 +218,6 @@ export const UploadFooter = styled.div`
   }
 `;
 
-// Przyciski
 export const UploadButton = styled.button`
   margin-top: 40px;
   padding: 10px 20px;
@@ -147,18 +259,12 @@ export const ClearStorageButton = styled.button`
   }
 `;
 
-// Komunikaty
-export const ErrorMessage = styled.p`
-  color: #ff6b6b;
-  margin-top: 20px;
-  font-weight: 500;
-`;
-
 export const WarningMessage = styled.p`
   color: #ffa500;
   margin-top: 10px;
   font-weight: 500;
   font-size: 0.9rem;
+  text-align: center;
 `;
 
 export const FileName = styled.p`
@@ -174,7 +280,37 @@ export const StorageInfo = styled.div`
   text-align: center;
 `;
 
-// Szczegóły
+export const AlertBox = styled.div`
+  position: absolute; /* Zmieniono z 'fixed' na 'absolute' */
+  top: 0; /* Zmieniono z 20px, aby był na samej górze */
+  left: 50%; 
+  transform: translateX(-50%);
+  padding: 15px 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  animation: ${fadeIn} 0.5s ease-out;
+  color: white;
+  font-weight: bold;
+  font-size: 0.95rem;
+  text-align: center;
+  min-width: 250px;
+  max-width: 90%;
+  
+  background-color: ${props => {
+    switch(props.type) {
+      case 'success':
+        return '#4CAF50';
+      case 'error':
+        return '#ff6b6b';
+      case 'warning':
+        return '#ffa500';
+      default:
+        return '#444';
+    }
+  }};
+`;
+
 export const DetailsContainer = styled.div`
   width: 100%;
   display: flex;
@@ -193,6 +329,21 @@ export const Thumbnail = styled.img`
   background-color: #2e2e33;
 `;
 
+export const ThumbnailPlaceholder = styled.div`
+  max-width: 400px;
+  max-height: 250px;
+  border-radius: 10px;
+  margin: 20px 0;
+  border: 2px solid #4A4A52;
+  background-color: #2e2e33;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 1rem;
+  min-height: 100px;
+`;
+
 export const DetailText = styled.p`
   font-size: 1.2rem;
   font-weight: 500;
@@ -204,7 +355,6 @@ export const DetailText = styled.p`
   }
 `;
 
-// Loading
 export const LoadingContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -219,7 +369,6 @@ export const LoadingSpinner = styled.div`
   margin: 50px auto;
 `;
 
-// Tooltip
 export const Tooltip = styled.div`
   position: absolute;
   background-color: #2A2A2E;
@@ -273,7 +422,6 @@ export const TooltipText = styled.div`
   }
 `;
 
-// Kolory i zmienne (opcjonalne)
 export const colors = {
   background: '#1A1A1D',
   surface: '#2A2A2E',
@@ -285,7 +433,8 @@ export const colors = {
   textMuted: '#888',
   accent: '#7FB3D3',
   error: '#ff6b6b',
-  warning: '#ffa500'
+  warning: '#ffa500',
+  success: '#32CD32'
 };
 
 export const spacing = {
@@ -296,3 +445,43 @@ export const spacing = {
   xl: '20px',
   xxl: '40px'
 };
+
+export const UserMenuContainer = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+`;
+
+export const DropdownMenu = styled.div`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #2A2A2E; 
+  border: 1px solid #4A4A52;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  width: 160px;
+  margin-top: 8px;
+  overflow: hidden;
+`;
+
+export const DropdownItem = styled.div`
+  padding: 10px 15px;
+  color: #E0E0E0;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #3A3A40; 
+  }
+
+  svg {
+    font-size: 1.1rem;
+    color: #B0B0B0;
+  }
+`;

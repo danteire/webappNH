@@ -1,13 +1,32 @@
 import React from 'react';
 import styled from 'styled-components';
 import { FiTrash2, FiClock } from 'react-icons/fi';
+import { media } from './breakpoints.js';
 
 const HistoryContainer = styled.div`
   background-color: #2A2A2E;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 16px;
-  height: fit-content;
-  min-height: 200px;
+  height: 100%;
+  max-height: calc(100vh - 120px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  
+  ${media.tablet} {
+    max-height: calc(100vh - 60px);
+    padding: 12px;
+  }
+  
+  ${media.mobile} {
+    max-height: 180px;
+    padding: 10px;
+  }
+  
+  @media (max-width: 360px) {
+    max-height: 150px;
+    padding: 8px;
+  }
 `;
 
 const HistoryTitle = styled.h3`
@@ -15,12 +34,53 @@ const HistoryTitle = styled.h3`
   margin-bottom: 16px;
   font-size: 1.1rem;
   font-weight: 600;
+  
+  ${media.mobile} {
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+  
+  @media (max-width: 360px) {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+  }
 `;
 
 const HistoryList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 4px;
+  margin: -4px -4px -4px 0;
+  padding-left: 4px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  
+  /* Stylowanie scrollbara */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #4A4A52;
+    border-radius: 3px;
+    transition: background 0.2s ease;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: #6A6A72;
+  }
+  
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #4A4A52 transparent;
 `;
 
 const HistoryItem = styled.div`

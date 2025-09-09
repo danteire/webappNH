@@ -1,5 +1,8 @@
 // uploadUtils.js - Funkcje do obsługi uploadu i przetwarzania obrazów
 import { checkStorageQuota, cleanOldEntries } from './History/HistoryUtils';
+import authService from '../../services/authService';
+import { getApiBaseUrl } from '../../config/api';
+import { mapResultsNames } from '../../utils/banknoteMapper';
 
 // Funkcja zapisywania szczegółów gościa
 export const saveGuestDetails = async (processId, guestDetails) => {
@@ -206,14 +209,21 @@ export const prepareUploadData = async (file, userId = null) => {
 };
 
 // Funkcja wysyłania na serwer
-export const uploadToServer = async (payload, serverUrl = 'http://127.0.0.1:8000/api/upload') => {
+export const uploadToServer = async (payload, serverUrl = `${getApiBaseUrl()}/api/upload`) => {
   try {
+    let headers = { 
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    };
+
+    // Dodaj token autoryzacji jeśli użytkownik jest zalogowany
+    if (authService.isAuthenticated()) {
+      headers['Authorization'] = `Bearer ${authService.getToken()}`;
+    }
+
     const response = await fetch(serverUrl, {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
+      headers,
       body: payload,
     });
 
@@ -229,9 +239,12 @@ export const uploadToServer = async (payload, serverUrl = 'http://127.0.0.1:8000
       throw new Error('Serwer zwrócił pustą odpowiedź');
     }
 
+    // Mapuj nazwy banknotów na czytelne nazwy
+    const mappedData = mapResultsNames(data);
+
     return {
       success: true,
-      data,
+      data: mappedData,
       processId: data.processId || Date.now()
     };
     
@@ -244,7 +257,10 @@ export const uploadToServer = async (payload, serverUrl = 'http://127.0.0.1:8000
 };
 
 // Główna funkcja obsługi uploadu
-export const handleImageUpload = async (file, userId, currentHistory, navigate) => {
+export const handleImageUpload = async (file, currentHistory, navigate) => {
+  // Pobierz ID użytkownika z authService
+  const user = authService.getUser();
+  const userId = user ? user.id : null;
   try {
     // 1. Przygotuj dane
     const prepResult = await prepareUploadData(file, userId);
@@ -264,10 +280,13 @@ export const handleImageUpload = async (file, userId, currentHistory, navigate) 
       };
     }
 
-    // 3. Zapisz w historii
-    const historyResult = await addToHistory(uploadResult.processId, userId, currentHistory);
-    if (!historyResult.success) {
-      console.warn('Nie udało się zapisać w historii:', historyResult.error);
+    // 3. Zapisz w historii (tylko dla gości)
+    let historyResult = null;
+    if (!userId) {
+      historyResult = await addToHistory(uploadResult.processId, userId, currentHistory);
+      if (!historyResult.success) {
+        console.warn('Nie udało się zapisać w historii:', historyResult.error);
+      }
     }
 
     // 4. Dla gości - zapisz szczegóły lokalnie
@@ -301,7 +320,7 @@ export const handleImageUpload = async (file, userId, currentHistory, navigate) 
     return {
       success: true,
       processId: uploadResult.processId,
-      newHistory: historyResult.newHistory || currentHistory,
+      newHistory: userId ? currentHistory : (historyResult?.newHistory || currentHistory),
       warning: storageWarning
     };
 
@@ -324,7 +343,7 @@ export const validateServerUrl = (url) => {
 };
 
 // Funkcja sprawdzania połączenia z serwerem
-export const checkServerConnection = async (serverUrl = 'http://127.0.0.1:8000/api/health') => {
+export const checkServerConnection = async (serverUrl = `${getApiBaseUrl()}/api/health`) => {
   try {
     const response = await fetch(serverUrl, {
       method: 'GET',

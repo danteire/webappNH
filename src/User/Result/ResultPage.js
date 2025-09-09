@@ -1,172 +1,133 @@
+// Plik: src/ResultsPage.js
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import styled from "styled-components";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import "./ResultPage.css"; // Import stylów
 
-const PageContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background-color: #0e0e10;
-  color: #fff;
-`;
+// Funkcja, która wyświetla poziome wykresy słupkowe
+const ModelDetailsList = ({ modelName, modelData }) => {
+  const top5Data = Object.entries(modelData.proba || {})
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 5)
+    .map(([name, value]) => ({ name, value }));
 
-const Header = styled.header`
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
-  background: #161618;
-`;
-
-const BackButton = styled.button`
-  background: #0088fe;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  &:hover {
-    background: #006fd6;
-  }
-`;
-
-const Content = styled.div`
-  display: flex;
-  flex-grow: 1;
-`;
-
-const LeftColumn = styled.div`
-  flex: 1;
-  border: 1px solid rgba(0, 0, 0, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-const CenterColumn = styled.div`
-  flex: 2;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-auto-rows: 280px;
-  gap: 20px;
-  padding: 20px;
-`;
-
-const ChartCard = styled.div`
-  background: #161618;
-  border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.4);
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const RightColumn = styled.div`
-  flex: 0.7; /* prawa kolumna zmniejszona o ~30% */
-  border: 1px solid rgba(0, 0, 0, 0.4);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-`;
-
-const ChartTitle = styled.h3`
-  margin-bottom: 10px;
-  font-size: 1rem;
-`;
-
-const colors = ["#0088FE", "#FF8042", "#00C49F", "#FFBB28", "#AA66CC"];
+  return (
+    <div className="chart-card">
+      <h4 className="chart-title">{modelName.toUpperCase()}</h4>
+      <div className="bar-chart-container">
+        {top5Data.map((item, index) => (
+          <div key={index} className="bar-item">
+            <div className="bar-label">{item.name}</div>
+            <div className="bar-wrapper">
+              <div 
+                className={`bar-fill ${index === 0 ? 'bar-first' : index === 1 ? 'bar-second' : 'bar-other'}`}
+                style={{ width: `${item.value * 100}%` }}
+              ></div>
+            </div>
+            <div className="bar-value">{(item.value * 100).toFixed(1)}%</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export default function ResultsPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { serverResponses, originalImageBase64 } = location.state || {
-    serverResponses: {},
-    originalImageBase64: "",
+  const { serverResponses, originalImageBase64 } = location.state || {};
+
+  if (!serverResponses || Object.keys(serverResponses).length === 0) {
+    return (
+      <div className="page-container">
+        <header className="header">
+          <h2 className="header-title">Błąd</h2>
+          <button className="back-button" onClick={() => navigate("/user")}>
+            Powrót
+          </button>
+        </header>
+        <main className="content">
+          <h2 style={{ color: "var(--text-secondary)" }}>Nie znaleziono danych wyników.</h2>
+        </main>
+      </div>
+    );
+  }
+
+  const topPredictions = Object.values(serverResponses).map(
+    (modelData) => modelData.pred
+  );
+  const predictionCounts = topPredictions.reduce((acc, pred) => {
+    acc[pred] = (acc[pred] || 0) + 1;
+    return acc;
+  }, {});
+  const consensusPrediction = Object.keys(predictionCounts).reduce((a, b) =>
+    predictionCounts[a] > predictionCounts[b] ? a : b
+  );
+  const relevantProbabilities = Object.values(serverResponses)
+    .filter((modelData) => modelData.pred === consensusPrediction)
+    .map((modelData) => {
+      const topProba = Object.entries(modelData.proba).sort(([, a], [, b]) => b - a)[0];
+      return topProba[1];
+    });
+  const averageProba =
+    relevantProbabilities.reduce((sum, proba) => sum + proba, 0) /
+    relevantProbabilities.length;
+  const isRecognized = averageProba >= 0.7;
+  const finalPrediction = isRecognized ? consensusPrediction : "Nie rozpoznano";
+
+  const progressBarWidth = {
+    width: `${averageProba * 100}%`
   };
 
   return (
-    <PageContainer>
-      {/* Header */}
-      <Header>
-        <h2>Wyniki klasyfikacji</h2>
-        <BackButton onClick={() => navigate("/user")}>
+    <div className="page-container">
+      <header className="header">
+        <h2 className="header-title">Wynik Analizy</h2>
+        <button className="back-button" onClick={() => navigate("/user")}>
           Powrót
-        </BackButton>
-      </Header>
+        </button>
+      </header>
 
-      <Content>
-        {/* Kolumna lewa — obraz */}
-        <LeftColumn>
-          {originalImageBase64 ? (
-           <img 
-            src={`data:image/jpeg;base64,${originalImageBase64}`} 
-            alt="Original" 
-            style={{ width: "100%", height: "auto", borderRadius: "12px" }}
-            />
-          ) : (
-            <p>Brak obrazu</p>
-          )}
-        </LeftColumn>
+      <main className="content">
+        {originalImageBase64 && (
+          <img
+            className="image-preview"
+            src={`data:image/jpeg;base64,${originalImageBase64}`}
+            alt="Przesłane zdjęcie"
+          />
+        )}
 
-        {/* Kolumna środkowa — wykresy */}
-        <CenterColumn>
-        {Object.entries(serverResponses || {}).map(([modelName, modelData], idx) => {
-            const top6 = Object.entries(modelData.proba || {})
-                .sort(([, a], [, b]) => b - a)
-                .slice(0, 6)
-                .map(([name, value]) => ({ name, value }));
+        <div className={`main-result-card ${isRecognized ? "recognized" : "unrecognized"}`}>
+          <h2 className="main-result-title">Wynik Końcowy</h2>
+          <p className={`main-prediction ${!isRecognized ? "unrecognized" : ""}`}>
+            {finalPrediction}
+          </p>
+          <div className="confidence-wrapper">
+            <span style={{ color: "var(--text-secondary)" }}>Pewność:</span>
+            <span className={`confidence-score ${!isRecognized ? "unrecognized" : ""}`}>
+              {(averageProba * 100).toFixed(2)}%
+            </span>
+            <div className="progress-bar-container">
+              <div
+                className={`progress-bar ${!isRecognized ? "unrecognized" : ""}`}
+                style={progressBarWidth}
+              ></div>
+            </div>
+          </div>
+        </div>
 
-            return (
-                <div key={idx} className="bg-[#161618] p-4 rounded-2xl shadow-md">
-                <h3 className="text-lg font-semibold mb-2">{modelName.toUpperCase()}</h3>
-                <ResponsiveContainer width="100%" height={250}>
-                    <PieChart>
-                    <Pie
-                        data={top6}
-                        dataKey="value"
-                        nameKey="name"
-                        outerRadius={80}
-                        label={({ name, value }) => `${name}: ${(value * 100).toFixed(1)}%`}
-                    >
-                        {top6.map((_, i) => (
-                        <Cell key={`cell-${i}`} fill={colors[i % colors.length]} />
-                        ))}
-                    </Pie>
-                    <Tooltip
-                        contentStyle={{
-                        backgroundColor: "#161618",
-                        border: "1px solid rgba(0,0,0,0.4)",
-                        color: "#00ffcc", // kolor czcionki
-                        }}
-                        formatter={(val, name) => [
-                        `${(val * 100).toFixed(1)}%`,
-                        name,
-                        ]}
-                    />
-                    </PieChart>
-                </ResponsiveContainer>
-                </div>
-            );
-        })}
-
-        </CenterColumn>
-
-        {/* Kolumna prawa — podsumowanie */}
-        <RightColumn>
-          <h2>Podsumowanie</h2>
-          {Object.entries(serverResponses || {}).map(([modelName, modelData]) => (
-            <p key={modelName}>
-              {modelName.toUpperCase()}: {modelData.pred}
-            </p>
-          ))}
-        </RightColumn>
-      </Content>
-    </PageContainer>
+        <section className="details-section">
+          <h3 className="details-title">Wyniki Poszczególnych Modeli</h3>
+          <div className="details-grid">
+            {Object.entries(serverResponses).map(([modelName, modelData]) => (
+              <ModelDetailsList
+                key={modelName}
+                modelName={modelName}
+                modelData={modelData}
+              />
+            ))}
+          </div>
+        </section>
+      </main>
+    </div>
   );
 }

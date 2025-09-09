@@ -1,0 +1,308 @@
+/* Plik: src/ResultsPage.css */
+
+:root {
+  --primary-color: #00aaff;
+  --background-start: #1e1e24;
+  --background-end: #0e0e10;
+  --text-primary: #f0f0f0;
+  --text-secondary: #a0a0a0;
+  --card-background: rgba(30, 30, 35, 0.7);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --success-color: #00c49f;
+  --neutral-color: #ffbb28;
+}
+
+/* Style ograniczone do ResultPage */
+/* Reset dla ResultPage - nadpisuje globalne style */
+.page-container {
+  display: flex !important;
+  flex-direction: column;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--background-start), var(--background-end));
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  color: var(--text-primary);
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  position: relative;
+}
+
+/* Responsywność */
+@media (max-width: 768px) {
+  .page-container {
+    padding: 0 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-container {
+    padding: 0 5px;
+  }
+}
+
+.header {
+  height: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  border-bottom: 1px solid var(--border-color);
+  background: rgba(14, 14, 16, 0.8);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 0 20px;
+    height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 0 15px;
+    height: 55px;
+  }
+}
+
+.header-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.back-button {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background: #0088d6;
+  transform: scale(1.05);
+}
+
+/* Reszta stylów... */
+.content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  padding: 40px;
+  width: 100%;
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: 50vh;
+  width: auto;
+  object-fit: contain;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.2);
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  /* animation: fadeIn 0.5s ease-out forwards; */
+}
+
+.main-result-card {
+  background: var(--card-background);
+  border-radius: 20px;
+  padding: 30px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  /* animation: fadeIn 0.6s ease-out forwards; */
+  width: 100%;
+  max-width: 700px;
+  text-align: center;
+}
+
+.main-result-card.recognized {
+  border-left: 5px solid var(--success-color);
+}
+
+.main-result-card.unrecognized {
+  border-left: 5px solid var(--neutral-color);
+}
+
+.main-result-title {
+  margin: 0 0 10px 0;
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.main-prediction {
+  margin: 0;
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.main-prediction.unrecognized {
+  color: var(--neutral-color);
+}
+
+.confidence-wrapper {
+  margin-top: 20px;
+}
+
+.confidence-score {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--success-color);
+  margin-left: 10px;
+}
+
+.confidence-score.unrecognized {
+  color: var(--neutral-color);
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: var(--success-color);
+  border-radius: 5px;
+  /* transition: width 0.5s ease-in-out; */
+}
+
+.progress-bar.unrecognized {
+  background-color: var(--neutral-color);
+}
+
+.details-section {
+  /* animation: fadeIn 0.7s ease-out forwards; */
+  width: 100%;
+  max-width: 1200px;
+}
+
+.details-title {
+  font-size: 2rem;
+  text-align: center;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+}
+
+.chart-card {
+  background: var(--card-background);
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-title {
+  margin: 0 0 20px 0;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Style dla poziomych wykresów słupkowych */
+.bar-chart-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.bar-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+/* Hover effect wyłączony */
+
+.bar-label {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  min-width: 80px;
+}
+
+.bar-wrapper {
+  position: relative;
+  height: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  overflow: hidden;
+  flex: 1;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  position: relative;
+  min-width: 2px;
+}
+
+/* Wszystkie wykresy używają tego samego zielonego stylu jak główny pasek */
+.bar-first,
+.bar-second,
+.bar-third,
+.bar-other {
+  background-color: var(--success-color);
+}
+
+.bar-value {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  text-align: right;
+  min-width: 50px;
+}
+
+.bar-percentage {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  z-index: 2;
+}
+
+/* Animacje wyłączone - statyczne wykresy */
+
+/* Animacje */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
