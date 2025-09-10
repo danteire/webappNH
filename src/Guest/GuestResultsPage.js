@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiRefreshCw } from 'react-icons/fi';
+import Button from '../components/Button';
 import './GuestResultsPage.css';
 
 // Funkcja, która wyświetla poziome wykresy słupkowe (skopiowana z głównej strony)
@@ -42,10 +43,15 @@ const GuestResultsPage = () => {
         <div className="error-container">
           <h2>Brak wyników</h2>
           <p>Nie znaleziono wyników analizy. Spróbuj ponownie.</p>
-          <button onClick={() => navigate('/guest')} className="retry-button">
+          <Button 
+            variant="primary" 
+            size="large" 
+            onClick={() => navigate('/guest')} 
+            className="retry-button"
+          >
             <FiRefreshCw />
             Spróbuj ponownie
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -91,13 +97,23 @@ const GuestResultsPage = () => {
       <div className="guest-results-container">
         <div className="results-header">
           <div className="header-buttons">
-            <button className="back-button" onClick={handleBackToGuest}>
+            <Button 
+              variant="ghost" 
+              size="medium" 
+              onClick={handleBackToGuest}
+              className="back-button"
+            >
               <FiArrowLeft />
               Nowa analiza
-            </button>
-            <button className="login-button" onClick={handleBackToLogin}>
+            </Button>
+            <Button 
+              variant="primary" 
+              size="medium" 
+              onClick={handleBackToLogin}
+              className="login-button"
+            >
               Zaloguj się
-            </button>
+            </Button>
           </div>
           <h1>Wyniki analizy</h1>
           <p>Tryb gościa - wyniki nie są zapisywane</p>

@@ -219,23 +219,29 @@ export const UploadFooter = styled.div`
 `;
 
 export const UploadButton = styled.button`
-  margin-top: 40px;
-  padding: 10px 20px;
-  background-color: #3A3A40;
-  color: #E0E0E0;
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  padding: 15px 30px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 
-  &:hover {
-    background-color: #505057;
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0056b3, #004085);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
   }
 
   &:disabled {
-    background-color: #2e2e33;
+    background: #6c757d;
     cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
   }
 `;
 
@@ -484,4 +490,123 @@ export const DropdownItem = styled.div`
     font-size: 1.1rem;
     color: #B0B0B0;
   }
+`;
+
+// Nowe komponenty dla panelu uploadu jak u gościa
+export const UploadSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`;
+
+export const UploadArea = styled.div`
+  border: 2px dashed #444;
+  border-radius: 10px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #222;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    border-color: #007bff;
+    background: #2a2a2a;
+  }
+`;
+
+export const UploadPlaceholder = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  color: #B0B0B0;
+
+  svg {
+    font-size: 3rem;
+    color: #007bff;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: #fff;
+  }
+
+  p {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .upload-info {
+    font-size: 0.9rem !important;
+    color: #888 !important;
+  }
+`;
+
+export const PreviewContainer = styled.div`
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const PreviewImage = styled.img`
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+`;
+
+export const PreviewOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 8px;
+
+  ${PreviewContainer}:hover & {
+    opacity: 1;
+  }
+
+  svg {
+    font-size: 2rem;
+  }
+`;
+
+export const FileInfo = styled.div`
+  background: #222;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #333;
+
+  p {
+    margin: 5px 0;
+    color: #B0B0B0;
+    font-size: 0.9rem;
+  }
+`;
+
+export const ErrorMessage = styled.div`
+  background: #4a1a1a;
+  color: #ff6b6b;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #6b2c2c;
+  font-size: 0.9rem;
 `;

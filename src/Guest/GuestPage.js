@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiUpload, FiImage, FiArrowLeft } from 'react-icons/fi';
 import { mapResultsNames } from '../utils/banknoteMapper';
+import Button from '../components/Button';
 import './GuestPage.css';
 
 const GuestPage = () => {
@@ -102,10 +103,15 @@ const GuestPage = () => {
     <div className="guest-page">
       <div className="guest-container">
         <div className="guest-header">
-          <button className="back-button" onClick={handleBackToLogin}>
+          <Button 
+            variant="ghost" 
+            size="medium" 
+            onClick={handleBackToLogin}
+            className="back-button"
+          >
             <FiArrowLeft />
             Powrót do logowania
-          </button>
+          </Button>
           <h1>Tryb Gościa</h1>
           <p>Prześlij zdjęcie banknotu, aby otrzymać analizę</p>
         </div>
@@ -157,13 +163,15 @@ const GuestPage = () => {
               </div>
             )}
 
-            <button 
-              className="upload-button"
+            <Button 
+              variant="primary" 
+              size="large" 
               onClick={handleUpload}
               disabled={!selectedFile || isUploading}
+              className="upload-button"
             >
               {isUploading ? 'Analizuję...' : 'Analizuj banknot'}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { FiTrash2, FiClock } from 'react-icons/fi';
+import { FiTrash2, FiClock, FiInfo } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 import { media } from './breakpoints.js';
+import banknoteService from '../../../services/banknoteService';
+import { mapBanknoteName } from '../../../utils/banknoteMapper';
 
 const HistoryContainer = styled.div`
   background-color: #2A2A2E;
   border-radius: 10px;
   padding: 16px;
-  height: 100%;
+  height: 70%;
   max-height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
@@ -158,13 +161,102 @@ const EmptyState = styled.div`
   padding: 20px;
 `;
 
+const InfoButton = styled.button`
+  background: linear-gradient(135deg, #17a2b8, #138496);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
+
+  &:hover {
+    background: linear-gradient(135deg, #138496, #0f6674);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
+  }
+
+  ${media.mobile} {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+`;
+
 const HistoryPanel = ({ 
   history, 
   onRemove, 
   onClickItem, 
   onHoverItem, 
-  onLeaveItem 
+  onLeaveItem,
+  userId 
 }) => {
+  const navigate = useNavigate();
+  const [banknotes, setBanknotes] = useState([]);
+  const [matchingBanknotes, setMatchingBanknotes] = useState({});
+
+  // Pobierz banknoty z bazy
+  useEffect(() => {
+    const loadBanknotes = async () => {
+      try {
+        const banknotesData = await banknoteService.getBanknotes();
+        setBanknotes(banknotesData);
+        
+        // Sprawdź dopasowania dla każdego elementu historii
+        const matches = {};
+        history.forEach((item, index) => {
+          if (typeof item === 'object' && item.knn_pred) {
+            const prediction = item.knn_pred || item.rf_pred || item.svm_pred || 'NONOTE0';
+            const mappedPrediction = mapBanknoteName(prediction);
+            
+            const matching = banknotesData.find(banknote => 
+              banknote.denomination === mappedPrediction || 
+              banknote.currency === mappedPrediction || 
+              banknote.country === mappedPrediction ||
+              `${banknote.country} ${banknote.currency}` === mappedPrediction
+            );
+            
+            if (matching) {
+              matches[index] = matching;
+            }
+          }
+        });
+        
+        setMatchingBanknotes(matches);
+      } catch (error) {
+        console.error('Błąd pobierania banknotów:', error);
+      }
+    };
+
+    if (history.length > 0) {
+      loadBanknotes();
+    }
+  }, [history]);
+
+  // history to tablica obiektów (dla zalogowanych) lub ID (dla gości)
+  const getPredictionText = (item) => {
+    if (!item) return 'Nieznany wynik';
+    
+    // Jeśli to obiekt z danymi (zalogowany użytkownik)
+    if (typeof item === 'object' && item.knn_pred) {
+      const prediction = item.knn_pred || item.rf_pred || item.svm_pred || 'NONOTE0';
+      return mapBanknoteName(prediction);
+    }
+    
+    // Jeśli to ID (gość) - zwróć placeholder
+    return 'Wynik niedostępny';
+  };
   const handleItemClick = (e, itemId) => {
     // Nie klikaj, jeśli kliknięto w przycisk usuń
     if (e.target.closest('button')) return;
@@ -233,7 +325,7 @@ const HistoryPanel = ({
             title="Kliknij, aby zobaczyć szczegóły, najedź aby zobaczyć podgląd"
           >
             <ItemHeader>
-              <ItemId>#{String(item).slice(-8)}</ItemId>
+              <ItemId>{getPredictionText(item)}</ItemId>
               <DeleteButton
                 onClick={(e) => handleDeleteClick(e, index)}
                 title="Usuń wpis"
@@ -243,8 +335,21 @@ const HistoryPanel = ({
             </ItemHeader>
             <ItemDate>
               <FiClock size={10} />
-              {formatDate(item)}
+              {typeof item === 'object' && item.timestamp ? formatDate(item.timestamp) : 'Data niedostępna'}
             </ItemDate>
+            {/* Przycisk "Więcej informacji o banknocie" */}
+            {matchingBanknotes[index] && (
+              <InfoButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/user/banknote/${matchingBanknotes[index].id}`);
+                }}
+                title="Więcej informacji o banknocie"
+              >
+                <FiInfo size={12} />
+                Więcej informacji
+              </InfoButton>
+            )}
           </HistoryItem>
         ))}
       </HistoryList>

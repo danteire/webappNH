@@ -670,7 +670,7 @@ const BanknoteDetailPage = () => {
         <header className="banknote-detail-header">
           <button className="back-button" onClick={handleBack}>
             <FiArrowLeft />
-            Powrót do listy
+            Powrót
           </button>
           <h1 className="page-title">Ładowanie...</h1>
         </header>
@@ -685,7 +685,7 @@ const BanknoteDetailPage = () => {
         <header className="banknote-detail-header">
           <button className="back-button" onClick={handleBack}>
             <FiArrowLeft />
-            Powrót do listy
+            Powrót
           </button>
           <h1 className="page-title">Błąd</h1>
         </header>
@@ -701,7 +701,7 @@ const BanknoteDetailPage = () => {
       <header className="banknote-detail-header">
         <button className="back-button" onClick={handleBack}>
           <FiArrowLeft />
-          Powrót do listy
+          Powrót
         </button>
         <h1 className="page-title">{banknote.denomination}</h1>
       </header>

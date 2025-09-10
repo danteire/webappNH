@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { FiX, FiSave, FiImage } from 'react-icons/fi';
+import { FiX, FiSave, FiImage, FiArrowLeft } from 'react-icons/fi';
 import ImageUpload from './ImageUpload';
+import Button from '../../components/Button';
 import './BanknoteEditModal.css';
 
 const BanknoteEditModal = ({ banknote, isOpen, onClose, onSave }) => {
@@ -66,9 +67,15 @@ const BanknoteEditModal = ({ banknote, isOpen, onClose, onSave }) => {
       <div className="modal-content">
         <div className="modal-header">
           <h2>Edytuj Banknot</h2>
-          <button className="close-button" onClick={onClose}>
-            <FiX />
-          </button>
+          <Button 
+            variant="ghost" 
+            size="small" 
+            onClick={onClose}
+            className="close-button"
+          >
+            <FiArrowLeft />
+            Powrót
+          </Button>
         </div>
 
         <div className="modal-body">
@@ -169,13 +176,23 @@ const BanknoteEditModal = ({ banknote, isOpen, onClose, onSave }) => {
         </div>
 
         <div className="modal-footer">
-          <button className="cancel-button" onClick={onClose}>
+          <Button 
+            variant="secondary" 
+            size="medium" 
+            onClick={onClose}
+            className="cancel-button"
+          >
             Anuluj
-          </button>
-          <button className="save-button" onClick={handleSave}>
+          </Button>
+          <Button 
+            variant="primary" 
+            size="medium" 
+            onClick={handleSave}
+            className="save-button"
+          >
             <FiSave />
             Zapisz zmiany
-          </button>
+          </Button>
         </div>
       </div>
     </div>

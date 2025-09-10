@@ -9,7 +9,9 @@ import GlobalStyles from '../../components/GlobalStyles';
 import authService from '../../services/authService';
 
 import { FaUserCircle } from "react-icons/fa";
+import { FiArrowLeft } from "react-icons/fi";
 import { useNavigate } from 'react-router-dom';
+import Button from '../../components/Button';
 
 import {
   LoadingOrError,
@@ -324,9 +326,14 @@ const UserListPage = () => {
       <MainContainer>
         <RightColumn>
           <TopBar>
-            <FaUserCircle onClick={() =>{
-                navigate('/admin')
-            }}/>
+            <Button 
+              variant="secondary" 
+              size="medium" 
+              onClick={() => navigate('/admin')}
+            >
+              <FiArrowLeft />
+              Powrót
+            </Button>
           </TopBar>
           <Title>Lista Użytkowników</Title>
           

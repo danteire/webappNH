@@ -10,6 +10,7 @@
   --border-color: rgba(255, 255, 255, 0.1);
   --success-color: #00c49f;
   --neutral-color: #ffbb28;
+  --info-color: #17a2b8;
 }
 
 /* Style ograniczone do ResultPage */
@@ -304,5 +305,59 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Sekcja z przyciskiem informacji o banknocie */
+.banknote-info-section {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+  padding: 0 20px;
+}
+
+.banknote-info-button {
+  background: linear-gradient(135deg, var(--info-color), #138496) !important;
+  color: white !important;
+  border: none !important;
+  padding: 12px 24px !important;
+  border-radius: 8px !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  text-transform: none !important;
+  letter-spacing: 0.5px !important;
+  box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3) !important;
+}
+
+.banknote-info-button:hover {
+  background: linear-gradient(135deg, #138496, #0f6674) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4) !important;
+}
+
+.banknote-info-button:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 10px rgba(23, 162, 184, 0.3) !important;
+}
+
+/* Responsywność dla przycisku */
+@media (max-width: 768px) {
+  .banknote-info-section {
+    margin: 15px 0;
+    padding: 0 10px;
+  }
+  
+  .banknote-info-button {
+    padding: 10px 20px !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .banknote-info-button {
+    padding: 8px 16px !important;
+    font-size: 0.85rem !important;
   }
 }

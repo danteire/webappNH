@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiUpload, FiUser, FiLoader, FiLogOut, FiSettings, FiInfo } from 'react-icons/fi';
 import HistoryPanel from './History/HistoryPage';
+import Button from '../../components/Button';
 
 import {
   MainContainer,
@@ -30,7 +31,15 @@ import {
   TooltipImage,
   TooltipText,
   AlertBox,
-  WarningMessage
+  WarningMessage,
+  UploadSection,
+  UploadArea,
+  UploadPlaceholder,
+  PreviewContainer,
+  PreviewImage,
+  PreviewOverlay,
+  FileInfo,
+  ErrorMessage
 } from './MainContent.styles';
 
 import {
@@ -62,6 +71,8 @@ const MainContent = ({ userId }) => {
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [isLoadingTooltip, setIsLoadingTooltip] = useState(false);
   const [storageInfo, setStorageInfo] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [error, setError] = useState(null);
 
   const handleLogout = () => {
     authService.logout();
@@ -87,9 +98,8 @@ const MainContent = ({ userId }) => {
         // Dla zalogowanych użytkowników historia to tablica obiektów z bazy danych
         // Dla gości to tablica ID z localStorage
         if (userId) {
-          // Historia z bazy danych - używamy ID obiektów
-          const historyIds = result.history.map(item => item.id);
-          setHistory(historyIds);
+          // Historia z bazy danych - używamy pełnych obiektów
+          setHistory(result.history);
         } else {
           // Historia z localStorage - już jest tablicą ID
           setHistory(result.history);
@@ -128,7 +138,8 @@ const MainContent = ({ userId }) => {
   };
 
   const removeHistoryItem = async (index) => {
-    const itemToRemoveId = history[index];
+    const itemToRemove = history[index];
+    const itemToRemoveId = itemToRemove.id || itemToRemove; // Obsługa zarówno obiektów jak i ID
     
     const result = await removeFromHistory(itemToRemoveId, index, userId, history);
     
@@ -154,22 +165,48 @@ const MainContent = ({ userId }) => {
 
   const handleFileChange = useCallback((event) => {
     const file = event.target.files[0];
-    
-    setSelectedFile(null);
-    setAlert(null);
-
     if (file) {
-      const validation = validateFile(file);
-      if (!validation.isValid) {
-        setAlert({ message: validation.errors.join(' '), type: 'error' });
+      handleFileSelect(file);
+    }
+  }, []);
+
+  const handleFileSelect = useCallback((file) => {
+    if (file) {
+      // Sprawdź typ pliku
+      if (!file.type.startsWith('image/')) {
+        setError('Proszę wybrać plik obrazu');
         return;
       }
-      
+
+      // Sprawdź rozmiar pliku (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        setError('Plik jest za duży. Maksymalny rozmiar to 10MB');
+        return;
+      }
+
       setSelectedFile(file);
-      setAlert({ message: 'Plik został poprawnie wybrany.', type: 'success' }); 
-    } else {
-      setAlert({ message: 'Wybór pliku został anulowany.', type: 'error' });
+      setError(null);
+      setAlert(null);
+
+      // Utwórz podgląd
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreviewUrl(e.target.result);
+      };
+      reader.readAsDataURL(file);
     }
+  }, []);
+
+  const handleDrop = useCallback((event) => {
+    event.preventDefault();
+    const file = event.dataTransfer.files[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  }, [handleFileSelect]);
+
+  const handleDragOver = useCallback((event) => {
+    event.preventDefault();
   }, []);
 
   const handleUpload = async () => {
@@ -190,8 +227,7 @@ const MainContent = ({ userId }) => {
       const historyResult = await loadHistory(userId);
       if (historyResult.success) {
         if (userId) {
-          const historyIds = historyResult.history.map(item => item.id);
-          setHistory(historyIds);
+          setHistory(historyResult.history);
         } else {
           setHistory(historyResult.history);
         }
@@ -208,11 +244,14 @@ const MainContent = ({ userId }) => {
     }
   };
 
-  const handleHistoryItemClick = async (itemId) => {
+  const handleHistoryItemClick = async (item) => {
     setIsLoadingDetails(true);
     setAlert(null);
     setSelectedDetails(null);
 
+    // Wyciągnij ID z obiektu lub użyj bezpośrednio jeśli to ID
+    const itemId = typeof item === 'object' ? item.id : item;
+    
     const result = await getItemDetails(itemId, userId);
     
     if (result.success) {
@@ -228,7 +267,10 @@ const MainContent = ({ userId }) => {
     setIsLoadingDetails(false);
   };
 
-  const handleHistoryItemHover = async (itemId, event) => {
+  const handleHistoryItemHover = async (item, event) => {
+    // Wyciągnij ID z obiektu lub użyj bezpośrednio jeśli to ID
+    const itemId = typeof item === 'object' ? item.id : item;
+    
     if (hoveredItem === itemId || isLoadingTooltip) return;
     
     setIsLoadingTooltip(true);
@@ -302,33 +344,77 @@ const MainContent = ({ userId }) => {
     return (
       <ContentWrapper>
         <Title>Prześlij zdjęcie banknotu</Title>
-        <UploadBox>
-          <input type="file" accept="image/*" onChange={handleFileChange} />
-          <UploadIconWrapper><FiUpload size={28} color="#B0B0B0" /></UploadIconWrapper>
-          <UploadFooter><p>Kliknij, aby wybrać plik</p></UploadFooter>
-        </UploadBox>
         
-        {selectedFile && <FileName>Wybrany plik: {selectedFile.name}</FileName>}
-        
-        {!userId && storageInfo && (
-          <StorageInfo>
-            Wykorzystano: {storageInfo.used}KB / ~5MB
-            {storageInfo.remaining < 1000 && (
-              <>
-                <WarningMessage>
-                  Mało miejsca w pamięci przeglądarki ({storageInfo.remaining}KB)
-                </WarningMessage>
-                <ClearStorageButton onClick={handleClearStorage}>
-                  Wyczyść historię
-                </ClearStorageButton>
-              </>
+        <UploadSection>
+          <UploadArea
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onClick={() => document.getElementById('file-input').click()}
+          >
+            <input
+              id="file-input"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              style={{ display: 'none' }}
+            />
+            
+            {previewUrl ? (
+              <PreviewContainer>
+                <PreviewImage src={previewUrl} alt="Podgląd" />
+                <PreviewOverlay>
+                  <FiUpload />
+                  <span>Kliknij, aby zmienić zdjęcie</span>
+                </PreviewOverlay>
+              </PreviewContainer>
+            ) : (
+              <UploadPlaceholder>
+                <FiUpload />
+                <h3>Przeciągnij i upuść zdjęcie tutaj</h3>
+                <p>lub kliknij, aby wybrać plik</p>
+                <p className="upload-info">Obsługiwane formaty: JPG, PNG, WebP (max 10MB)</p>
+              </UploadPlaceholder>
             )}
-          </StorageInfo>
-        )}
-        
-        <UploadButton onClick={handleUpload} disabled={uploading}>
-          {uploading ? 'Wysyłanie...' : 'Wyślij'}
-        </UploadButton>
+          </UploadArea>
+
+          {selectedFile && (
+            <FileInfo>
+              <p><strong>Wybrany plik:</strong> {selectedFile.name}</p>
+              <p><strong>Rozmiar:</strong> {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+            </FileInfo>
+          )}
+
+          {error && (
+            <ErrorMessage>
+              {error}
+            </ErrorMessage>
+          )}
+
+          {!userId && storageInfo && (
+            <StorageInfo>
+              Wykorzystano: {storageInfo.used}KB / ~5MB
+              {storageInfo.remaining < 1000 && (
+                <>
+                  <WarningMessage>
+                    Mało miejsca w pamięci przeglądarki ({storageInfo.remaining}KB)
+                  </WarningMessage>
+                  <ClearStorageButton onClick={handleClearStorage}>
+                    Wyczyść historię
+                  </ClearStorageButton>
+                </>
+              )}
+            </StorageInfo>
+          )}
+
+          <Button 
+            variant="primary" 
+            size="large" 
+            onClick={handleUpload} 
+            disabled={uploading}
+          >
+            {uploading ? 'Analizuję...' : 'ANALIZUJ BANKNOT'}
+          </Button>
+        </UploadSection>
       </ContentWrapper>
     );
   };
@@ -348,6 +434,7 @@ const MainContent = ({ userId }) => {
             onClickItem={handleHistoryItemClick}
             onHoverItem={handleHistoryItemHover}
             onLeaveItem={handleHistoryItemLeave}
+            userId={userId}
           />
         </LeftColumn>
         <RightColumn>

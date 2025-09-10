@@ -9,8 +9,10 @@ import GlobalStyles from '../../components/GlobalStyles';
 import authService from '../../services/authService';
 import banknoteService from '../../services/banknoteService';
 import BanknoteEditModal from '../BanknoteEdit/BanknoteEditModal';
+import Button from '../../components/Button';
 
-import { FaFlag, FaEdit, FaPlus, FaTrash } from "react-icons/fa";
+import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
+import { FiArrowLeft } from "react-icons/fi";
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -162,14 +164,22 @@ const BanknoteListPage = () => {
               </div>
             )}
             <BanknoteActions>
-              <EditButton onClick={() => handleEditBanknote(banknote)}>
+              <Button 
+                variant="info" 
+                size="small" 
+                onClick={() => handleEditBanknote(banknote)}
+              >
                 <FaEdit />
                 Edytuj
-              </EditButton>
-              <DeleteButton onClick={() => handleDeleteBanknote(banknote)}>
+              </Button>
+              <Button 
+                variant="danger" 
+                size="small" 
+                onClick={() => handleDeleteBanknote(banknote)}
+              >
                 <FaTrash />
                 Usuń
-              </DeleteButton>
+              </Button>
             </BanknoteActions>
           </BanknoteCard>
         ))}
@@ -183,14 +193,23 @@ const BanknoteListPage = () => {
       <MainContainer>
         <RightColumn>
           <TopBar>
-            <FaFlag onClick={() =>{
-                navigate('/admin')
-            }}/>
+            <Button 
+              variant="primary" 
+              size="medium" 
+              onClick={() => navigate('/admin')}
+            >
+              <FiArrowLeft />
+              Powrót
+            </Button>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <EditButton onClick={handleAddBanknote}>
+              <Button 
+                variant="success" 
+                size="medium" 
+                onClick={handleAddBanknote}
+              >
                 <FaPlus />
                 Dodaj banknot
-              </EditButton>
+              </Button>
             </div>
           </TopBar>
           <Title>Banknoty w Bazie Danych</Title>
