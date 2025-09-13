@@ -1,9 +1,7 @@
-// src/components/MenuPage.js
+// Layout głównej strony użytkownika z responsywnym kontenerem
 import React from 'react';
 import styled from 'styled-components';
-import Sidebar from './Sidebar';
 import MainContent from './MainContent';
-import RecognitionPanel from './RecognitionPanel';
 import GlobalStyles from '../../components/GlobalStyles';
 import authService from '../../services/authService';
 import { media } from './breakpoints.js';

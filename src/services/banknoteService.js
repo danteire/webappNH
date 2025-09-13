@@ -6,14 +6,14 @@ class BanknoteService {
     if (imagePath.startsWith('data:image')) return imagePath; // base64
     if (imagePath.startsWith('http')) return imagePath; // pełny URL
     
-    // Sprawdź czy to ścieżka z resources/
+    // Sprawdzam czy to ścieżka z resources/
     if (imagePath.startsWith('resources/')) {
-      // Dodaj domenę do względnej ścieżki
+      // Dodaję domenę do względnej ścieżki
       const timestamp = Date.now();
       return `${API_BASE_URL}/${imagePath}?v=${timestamp}`;
     }
     
-    // Fallback - zwróć ścieżkę bezpośrednio
+    // Fallback - zwracam ścieżkę bezpośrednio
     return imagePath;
   }
 

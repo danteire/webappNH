@@ -13,12 +13,12 @@ import GuestResultsPage from './Guest/GuestResultsPage';
 import authService from './services/authService';
 import GlobalStyles from './components/GlobalStyles';
 
-// Komponent chroniony - wymaga logowania
+// Sprawdza czy użytkownik jest zalogowany, jeśli nie to przekierowuje na login
 const ProtectedRoute = ({ children }) => {
   return authService.isAuthenticated() ? children : <Navigate to="/" />;
 };
 
-// Komponent chroniony - wymaga uprawnień administratora
+// Sprawdza czy użytkownik ma uprawnienia admina, jeśli nie to przekierowuje na stronę użytkownika
 const AdminRoute = ({ children }) => {
   const user = authService.getUser();
   return (authService.isAuthenticated() && user && user.admin) ? children : <Navigate to="/user" />;

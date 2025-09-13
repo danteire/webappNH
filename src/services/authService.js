@@ -8,7 +8,7 @@ class AuthService {
         this.user = JSON.parse(localStorage.getItem('user') || 'null');
     }
 
-    // Logowanie użytkownika
+    // Loguję użytkownika
     async login(username, password) {
         try {
             const formData = new FormData();
@@ -29,7 +29,7 @@ class AuthService {
             this.token = data.access_token;
             localStorage.setItem('token', this.token);
 
-            // Pobierz informacje o użytkowniku
+            // Pobieram informacje o użytkowniku
             await this.getCurrentUser();
             
             return { success: true, user: this.user };
@@ -39,7 +39,7 @@ class AuthService {
         }
     }
 
-    // Rejestracja użytkownika
+    // Rejestruję użytkownika
     async register(username, password) {
         try {
             const response = await fetch(`${API_BASE_URL}/api/register`, {
@@ -63,7 +63,7 @@ class AuthService {
         }
     }
 
-    // Pobierz informacje o aktualnym użytkowniku
+    // Pobieram informacje o aktualnym użytkowniku
     async getCurrentUser() {
         if (!this.token) return null;
 
@@ -89,7 +89,7 @@ class AuthService {
         }
     }
 
-    // Wylogowanie
+    // Wylogowuję użytkownika
     logout() {
         this.token = null;
         this.user = null;
@@ -97,27 +97,27 @@ class AuthService {
         localStorage.removeItem('user');
     }
 
-    // Sprawdź czy użytkownik jest zalogowany
+    // Sprawdzam czy użytkownik jest zalogowany
     isAuthenticated() {
         return !!this.token && !!this.user;
     }
 
-    // Pobierz token
+    // Pobieram token
     getToken() {
         return this.token;
     }
 
-    // Pobierz użytkownika
+    // Pobieram użytkownika
     getUser() {
         return this.user;
     }
 
-    // Pobierz bazowy URL API
+    // Pobieram bazowy URL API
     getApiBaseUrl() {
         return API_BASE_URL;
     }
 
-    // Wykonaj autoryzowane żądanie
+    // Wykonuję autoryzowane żądanie
     async authenticatedRequest(url, options = {}) {
         if (!this.token) {
             throw new Error('Brak tokenu autoryzacji');
@@ -135,5 +135,5 @@ class AuthService {
     }
 }
 
-// Eksportuj instancję singleton
+// Eksportuję instancję singleton
 export default new AuthService();

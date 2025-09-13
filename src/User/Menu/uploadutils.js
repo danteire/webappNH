@@ -1,12 +1,12 @@
-// uploadUtils.js - Funkcje do obsługi uploadu i przetwarzania obrazów
+// Funkcje do obsługi uploadu i przetwarzania obrazów
 import { checkStorageQuota, cleanOldEntries } from './History/HistoryUtils';
 import authService from '../../services/authService';
 import { getApiBaseUrl } from '../../config/api';
 import { mapResultsNames } from '../../utils/banknoteMapper';
 
-// Funkcja zapisywania szczegółów gościa
+// Zapisuję szczegóły gościa
 export const saveGuestDetails = async (processId, guestDetails) => {
-  // Sprawdź dostępne miejsce przed zapisem
+  // Sprawdzam dostępne miejsce przed zapisem
   const storageInfo = checkStorageQuota();
   console.log(`Storage used: ${storageInfo.used}KB, remaining: ${storageInfo.remaining}KB`);
   
@@ -23,12 +23,12 @@ export const saveGuestDetails = async (processId, guestDetails) => {
   } catch (storageError) {
     console.warn('Błąd zapisywania do localStorage:', storageError);
     
-    // W przypadku przekroczenia limitu, usuń więcej starych wpisów
+    // W przypadku przekroczenia limitu, usuwam więcej starych wpisów
     cleanOldEntries(10);
     
     try {
       const detailsStore = JSON.parse(localStorage.getItem('guestHistoryDetails')) || {};
-      // Zapisz tylko z małą miniaturą
+      // Zapisuję tylko z małą miniaturą
       const reducedDetails = {
         ...guestDetails,
         imageBase64: guestDetails.thumbnailBase64, // Użyj tylko małej miniatury
@@ -50,7 +50,7 @@ export const saveGuestDetails = async (processId, guestDetails) => {
   }
 };
 
-// Funkcja dodawania wpisu do historii
+// Dodaję wpis do historii
 const addToHistory = async (processId, userId, currentHistory) => {
   if (userId) {
     try {
@@ -88,7 +88,7 @@ export const compressImage = (file, maxWidth = 800, maxHeight = 600, quality = 0
     
     img.onload = () => {
       try {
-        // Oblicz nowe wymiary zachowując proporcje
+        // Obliczam nowe wymiary zachowując proporcje
         let { width, height } = img;
         
         const aspectRatio = width / height;
@@ -108,12 +108,12 @@ export const compressImage = (file, maxWidth = 800, maxHeight = 600, quality = 0
         canvas.width = width;
         canvas.height = height;
         
-        // Rysuj skompresowany obraz z anti-aliasing
+        // Rysuję skompresowany obraz z anti-aliasing
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, width, height);
         
-        // Konwertuj do base64 z kompresją
+        // Konwertuję do base64 z kompresją
         const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
         resolve(compressedBase64.split(',')[1]);
       } catch (err) {
@@ -129,7 +129,7 @@ export const compressImage = (file, maxWidth = 800, maxHeight = 600, quality = 0
   });
 };
 
-// Funkcja walidacji pliku
+// Waliduję plik
 export const validateFile = (file) => {
   const errors = [];
   
@@ -138,13 +138,13 @@ export const validateFile = (file) => {
     return { isValid: false, errors };
   }
   
-  // Sprawdź typ pliku
+  // Sprawdzam typ pliku
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
   if (!allowedTypes.includes(file.type)) {
     errors.push('Dozwolone są tylko pliki JPG, PNG i WebP.');
   }
   
-  // Sprawdź rozmiar pliku (max 10MB)
+  // Sprawdzam rozmiar pliku (max 10MB)
   const maxSize = 10 * 1024 * 1024; // 10MB
   if (file.size > maxSize) {
     errors.push('Plik jest za duży. Maksymalny rozmiar to 10MB.');
@@ -161,10 +161,10 @@ export const validateFile = (file) => {
   };
 };
 
-// Funkcja przygotowania danych do wysłania
+// Przygotowuję dane do wysłania
 export const prepareUploadData = async (file, userId = null) => {
   try {
-    // Walidacja pliku
+    // Waliduję plik
     const validation = validateFile(file);
     if (!validation.isValid) {
       return {
@@ -173,10 +173,10 @@ export const prepareUploadData = async (file, userId = null) => {
       };
     }
 
-    // Kompresuj obraz do wysłania na serwer
+    // Kompresuję obraz do wysłania na serwer
     const compressedBase64 = await compressImage(file, 800, 600, 0.8);
     
-    // Przygotuj payload
+    // Przygotowuję payload
     const payload = {
       image: compressedBase64,
       metadata: {
@@ -186,7 +186,7 @@ export const prepareUploadData = async (file, userId = null) => {
       }
     };
 
-    // Dla gości, przygotuj również miniaturę
+    // Dla gości, przygotowuję również miniaturę
     let thumbnailBase64 = null;
     if (!userId) {
       thumbnailBase64 = await compressImage(file, 200, 150, 0.5);
@@ -208,7 +208,7 @@ export const prepareUploadData = async (file, userId = null) => {
   }
 };
 
-// Funkcja wysyłania na serwer
+// Wysyłam na serwer
 export const uploadToServer = async (payload, serverUrl = `${getApiBaseUrl()}/api/upload`) => {
   try {
     let headers = { 
@@ -216,7 +216,7 @@ export const uploadToServer = async (payload, serverUrl = `${getApiBaseUrl()}/ap
       'Accept': 'application/json'
     };
 
-    // Dodaj token autoryzacji jeśli użytkownik jest zalogowany
+    // Dodaję token autoryzacji jeśli użytkownik jest zalogowany
     if (authService.isAuthenticated()) {
       headers['Authorization'] = `Bearer ${authService.getToken()}`;
     }
@@ -234,12 +234,12 @@ export const uploadToServer = async (payload, serverUrl = `${getApiBaseUrl()}/ap
 
     const data = await response.json();
     
-    // Walidacja odpowiedzi serwera
+    // Waliduję odpowiedź serwera
     if (!data) {
       throw new Error('Serwer zwrócił pustą odpowiedź');
     }
 
-    // Mapuj nazwy banknotów na czytelne nazwy
+    // Mapuję nazwy banknotów na czytelne nazwy
     const mappedData = mapResultsNames(data);
 
     return {
@@ -258,11 +258,11 @@ export const uploadToServer = async (payload, serverUrl = `${getApiBaseUrl()}/ap
 
 // Główna funkcja obsługi uploadu
 export const handleImageUpload = async (file, currentHistory, navigate) => {
-  // Pobierz ID użytkownika z authService
+  // Pobieram ID użytkownika z authService
   const user = authService.getUser();
   const userId = user ? user.id : null;
   try {
-    // 1. Przygotuj dane
+    // 1. Przygotowuję dane
     const prepResult = await prepareUploadData(file, userId);
     if (!prepResult.success) {
       return {
@@ -271,7 +271,7 @@ export const handleImageUpload = async (file, currentHistory, navigate) => {
       };
     }
 
-    // 2. Wyślij na serwer
+    // 2. Wysyłam na serwer
     const uploadResult = await uploadToServer(prepResult.payload);
     if (!uploadResult.success) {
       return {
@@ -280,7 +280,7 @@ export const handleImageUpload = async (file, currentHistory, navigate) => {
       };
     }
 
-    // 3. Zapisz w historii (tylko dla gości)
+    // 3. Zapisuję w historii (tylko dla gości)
     let historyResult = null;
     if (!userId) {
       historyResult = await addToHistory(uploadResult.processId, userId, currentHistory);
@@ -289,7 +289,7 @@ export const handleImageUpload = async (file, currentHistory, navigate) => {
       }
     }
 
-    // 4. Dla gości - zapisz szczegóły lokalnie
+    // 4. Dla gości - zapisuję szczegóły lokalnie
     let storageWarning = null;
     if (!userId) {
       const guestDetails = {
@@ -309,7 +309,7 @@ export const handleImageUpload = async (file, currentHistory, navigate) => {
       }
     }
 
-    // 5. Przejdź do wyników
+    // 5. Przechodzę do wyników
     navigate('/results', { 
       state: { 
         serverResponses: uploadResult.data, 
@@ -332,7 +332,7 @@ export const handleImageUpload = async (file, currentHistory, navigate) => {
   }
 };
 
-// Funkcja walidacji URL serwera
+// Waliduję URL serwera
 export const validateServerUrl = (url) => {
   try {
     new URL(url);
@@ -342,7 +342,7 @@ export const validateServerUrl = (url) => {
   }
 };
 
-// Funkcja sprawdzania połączenia z serwerem
+// Sprawdzam połączenie z serwerem
 export const checkServerConnection = async (serverUrl = `${getApiBaseUrl()}/api/health`) => {
   try {
     const response = await fetch(serverUrl, {

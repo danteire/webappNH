@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { FiX, FiSave, FiImage } from 'react-icons/fi';
+import { FiSave, FiArrowLeft } from 'react-icons/fi';
 import ImageUpload from './ImageUpload';
+import Button from '../../components/Button';
 import './BanknoteEditModal.css';
 
 const BanknoteEditModal = ({ banknote, isOpen, onClose, onSave }) => {
@@ -16,7 +17,7 @@ const BanknoteEditModal = ({ banknote, isOpen, onClose, onSave }) => {
     image_rewers: banknote?.image_rewers || ''
   });
 
-  // Aktualizuj formularz gdy zmienia się banknote
+  // Aktualizuję formularz gdy zmienia się banknot
   useEffect(() => {
     if (banknote) {
       setFormData({
@@ -31,7 +32,7 @@ const BanknoteEditModal = ({ banknote, isOpen, onClose, onSave }) => {
         image_rewers: banknote.image_rewers || ''
       });
     } else {
-      // Resetuj formularz dla nowego banknotu
+      // Resetuję formularz dla nowego banknotu
       setFormData({
         id: null,
         country: '',
@@ -66,9 +67,15 @@ const BanknoteEditModal = ({ banknote, isOpen, onClose, onSave }) => {
       <div className="modal-content">
         <div className="modal-header">
           <h2>Edytuj Banknot</h2>
-          <button className="close-button" onClick={onClose}>
-            <FiX />
-          </button>
+          <Button 
+            variant="ghost" 
+            size="small" 
+            onClick={onClose}
+            className="close-button"
+          >
+            <FiArrowLeft />
+            Powrót
+          </Button>
         </div>
 
         <div className="modal-body">
@@ -98,8 +105,6 @@ const BanknoteEditModal = ({ banknote, isOpen, onClose, onSave }) => {
                 <option value="EUR">EUR - Euro</option>
                 <option value="USD">USD - Dolar amerykański</option>
                 <option value="TRY">TRY - Lira turecka</option>
-                <option value="GBP">GBP - Funt brytyjski</option>
-                <option value="CHF">CHF - Frank szwajcarski</option>
               </select>
             </div>
 
@@ -169,13 +174,23 @@ const BanknoteEditModal = ({ banknote, isOpen, onClose, onSave }) => {
         </div>
 
         <div className="modal-footer">
-          <button className="cancel-button" onClick={onClose}>
+          <Button 
+            variant="secondary" 
+            size="medium" 
+            onClick={onClose}
+            className="cancel-button"
+          >
             Anuluj
-          </button>
-          <button className="save-button" onClick={handleSave}>
+          </Button>
+          <Button 
+            variant="primary" 
+            size="medium" 
+            onClick={handleSave}
+            className="save-button"
+          >
             <FiSave />
             Zapisz zmiany
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiUpload, FiX, FiImage } from 'react-icons/fi';
+import { FiUpload, FiX } from 'react-icons/fi';
 import styled from 'styled-components';
 
 const UploadContainer = styled.div`
@@ -122,7 +122,7 @@ const ImageUpload = ({
         return;
       }
 
-      // Konwertuj do base64
+      // Konwersja do base64
       const reader = new FileReader();
       reader.onload = (e) => {
         const base64 = e.target.result;

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiUpload, FiImage, FiArrowLeft } from 'react-icons/fi';
 import { mapResultsNames } from '../utils/banknoteMapper';
+import Button from '../components/Button';
 import './GuestPage.css';
 
 const GuestPage = () => {
@@ -14,13 +15,13 @@ const GuestPage = () => {
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
     if (file) {
-      // Sprawdź typ pliku
+      // Sprawdzam czy to obraz
       if (!file.type.startsWith('image/')) {
         setError('Proszę wybrać plik obrazu');
         return;
       }
 
-      // Sprawdź rozmiar pliku (max 10MB)
+      // Sprawdzam rozmiar (max 10MB)
       if (file.size > 10 * 1024 * 1024) {
         setError('Plik jest za duży. Maksymalny rozmiar to 10MB');
         return;
@@ -29,7 +30,7 @@ const GuestPage = () => {
       setSelectedFile(file);
       setError(null);
 
-      // Utwórz podgląd
+      // Tworzę podgląd obrazu
       const reader = new FileReader();
       reader.onload = (e) => {
         setPreviewUrl(e.target.result);
@@ -75,15 +76,15 @@ const GuestPage = () => {
 
       const result = await response.json();
       
-      // Mapuj nazwy banknotów (tak jak w głównej stronie)
+      // Mapuję nazwy banknotów (tak jak w głównej stronie)
       const mappedResult = mapResultsNames(result);
-      
-      // Przekieruj na stronę wyników z danymi (w formacie jak w głównej stronie)
+
+      // Przekierowuję na stronę wyników z danymi (w formacie jak w głównej stronie)
       navigate('/guest-results', { 
         state: { 
           serverResponses: mappedResult,
-          originalImageBase64: previewUrl?.split(',')[1] // Usuń prefix data:image
-        } 
+          originalImageBase64: previewUrl?.split(',')[1] // Usuwam prefix data:image
+        }
       });
 
     } catch (err) {
@@ -102,10 +103,15 @@ const GuestPage = () => {
     <div className="guest-page">
       <div className="guest-container">
         <div className="guest-header">
-          <button className="back-button" onClick={handleBackToLogin}>
+          <Button 
+            variant="ghost" 
+            size="medium" 
+            onClick={handleBackToLogin}
+            className="back-button"
+          >
             <FiArrowLeft />
             Powrót do logowania
-          </button>
+          </Button>
           <h1>Tryb Gościa</h1>
           <p>Prześlij zdjęcie banknotu, aby otrzymać analizę</p>
         </div>
@@ -157,13 +163,15 @@ const GuestPage = () => {
               </div>
             )}
 
-            <button 
-              className="upload-button"
+            <Button 
+              variant="primary" 
+              size="large" 
               onClick={handleUpload}
               disabled={!selectedFile || isUploading}
+              className="upload-button"
             >
               {isUploading ? 'Analizuję...' : 'Analizuj banknot'}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
-// src/Admin/Dashboard.js
+// Panel administratora z dashboardem i statystykami
 import React, { useState, useEffect } from "react";
 import { FaUserCircle, FaDatabase, FaFlag, FaCogs } from "react-icons/fa";
-import { FiUser, FiLogOut, FiSettings, FiHome } from "react-icons/fi";
+import { FiUser, FiLogOut, FiHome } from "react-icons/fi";
 import { useNavigate } from 'react-router-dom';
 import authService from '../../services/authService';
 
@@ -39,7 +39,7 @@ const Dashboard = () => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-    // Użyj autoryzowanych endpointów z /api/
+    // Używam autoryzowanych endpointów z /api/
     const fetchData = async () => {
       try {
         const response = await authService.authenticatedRequest('/api/admin/stats');
@@ -47,7 +47,7 @@ const Dashboard = () => {
           const json = await response.json();
           setData({
             usersCount: json.total_users,
-            countryCount: json.total_banknotes, // Rzeczywista liczba banknotów z API
+            countryCount: json.total_banknotes, // Prawdziwa liczba banknotów z API
             historyCount: json.total_history,
             serverStatus: "on"
           });
@@ -78,9 +78,6 @@ const Dashboard = () => {
     navigate('/');
   };
 
-  const handleBackToUser = () => {
-    navigate('/user');
-  };
 
   const handleMenuToggle = () => {
     setIsMenuOpen(!isMenuOpen);

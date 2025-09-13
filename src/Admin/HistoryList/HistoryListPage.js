@@ -8,8 +8,10 @@ import {
 import GlobalStyles from '../../components/GlobalStyles';
 import authService from '../../services/authService';
 
-import { FaDatabase } from "react-icons/fa";
+// Usunięto nieużywaną ikonę FaDatabase
+import { FiArrowLeft } from "react-icons/fi";
 import { useNavigate } from 'react-router-dom';
+import Button from '../../components/Button';
 
 import {
   LoadingOrError,
@@ -104,9 +106,14 @@ const HistoryListPage = () => {
       <MainContainer>
         <RightColumn>
           <TopBar>
-            <FaDatabase onClick={() =>{
-                navigate('/admin')
-            }}/>
+            <Button 
+              variant="secondary" 
+              size="medium" 
+              onClick={() => navigate('/admin')}
+            >
+              <FiArrowLeft />
+              Powrót
+            </Button>
           </TopBar>
           <Title>Historia Wszystkich Użytkowników</Title>
           

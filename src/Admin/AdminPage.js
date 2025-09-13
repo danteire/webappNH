@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaBell, FaUserCircle, FaDatabase, FaFlag, FaCogs } from "react-icons/fa";
+// Usunąłem nieużywane ikony
 import authService from '../services/authService';
 import GlobalStyles from '../components/GlobalStyles';
 import Dashboard from './Dashboard/Dashboard';
@@ -76,7 +76,7 @@ const AppContainer = styled.div`
 function AdminPage() {
   const navigate = useNavigate();
   
-  // Sprawdź czy użytkownik jest administratorem
+  // Sprawdzam czy użytkownik ma uprawnienia administratora
   useEffect(() => {
     const user = authService.getUser();
     if (!user || !user.admin) {
