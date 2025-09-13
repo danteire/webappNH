@@ -30,7 +30,7 @@ const GuestPage = () => {
       setSelectedFile(file);
       setError(null);
 
-      // Tworzę podgląd obrazu
+      // Podgląd obrazu
       const reader = new FileReader();
       reader.onload = (e) => {
         setPreviewUrl(e.target.result);
@@ -76,14 +76,14 @@ const GuestPage = () => {
 
       const result = await response.json();
       
-      // Mapuję nazwy banknotów (tak jak w głównej stronie)
+      // Mapowanie nazwy banknotów
       const mappedResult = mapResultsNames(result);
 
-      // Przekierowuję na stronę wyników z danymi (w formacie jak w głównej stronie)
+      // Przekierowuanie na stronę wyników z danymi
       navigate('/guest-results', { 
         state: { 
           serverResponses: mappedResult,
-          originalImageBase64: previewUrl?.split(',')[1] // Usuwam prefix data:image
+          originalImageBase64: previewUrl?.split(',')[1]
         }
       });
 

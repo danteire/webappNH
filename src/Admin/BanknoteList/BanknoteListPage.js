@@ -6,7 +6,7 @@ import {
   Title,
 } from "../Dashboard/Dashboard.styles";
 import GlobalStyles from '../../components/GlobalStyles';
-// Usunięto nieużywany authService
+
 import banknoteService from '../../services/banknoteService';
 import BanknoteEditModal from '../BanknoteEdit/BanknoteEditModal';
 import Button from '../../components/Button';

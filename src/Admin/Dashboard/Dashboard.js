@@ -39,7 +39,7 @@ const Dashboard = () => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-    // Używam autoryzowanych endpointów z /api/
+
     const fetchData = async () => {
       try {
         const response = await authService.authenticatedRequest('/api/admin/stats');
@@ -47,7 +47,7 @@ const Dashboard = () => {
           const json = await response.json();
           setData({
             usersCount: json.total_users,
-            countryCount: json.total_banknotes, // Prawdziwa liczba banknotów z API
+            countryCount: json.total_banknotes,
             historyCount: json.total_history,
             serverStatus: "on"
           });

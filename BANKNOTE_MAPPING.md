@@ -1,8 +1,5 @@
 # Mapowanie nazw banknotów na czytelne nazwy
 
-## Problem
-System używał technicznych oznaczeń banknotów (np. `PLN50`, `USD100`, `NONOTE0`), które nie były czytelne dla użytkowników.
-
 ## Rozwiązanie
 Stworzono system mapowania, który zamienia techniczne oznaczenia na czytelne nazwy.
 
@@ -44,51 +41,3 @@ Stworzono system mapowania, który zamienia techniczne oznaczenia na czytelne na
 
 ### Nie rozpoznano
 - `NONOTE0` → `Nie rozpoznano`
-
-## Implementacja
-
-### Plik `banknoteMapper.js`
-- `mapBanknoteName(code)` - mapuje pojedynczy kod
-- `mapResultsNames(results)` - mapuje cały obiekt wyników
-
-### Zastosowanie
-- **ResultPage** - wykresy słupkowe z czytelnymi nazwami
-- **Historia** - szczegóły i podglądy z czytelnymi nazwami
-- **Upload** - wyniki uploadu z czytelnymi nazwami
-
-## Testowanie
-
-### 1. Strona wyników (`/results`)
-- Sprawdź czy wykresy pokazują `50 PLN` zamiast `PLN50`
-- Sprawdź czy `NONOTE0` pokazuje się jako `Nie rozpoznano`
-
-### 2. Historia (`/user`)
-- Sprawdź szczegóły wpisów w historii
-- Sprawdź podglądy przy najechaniu myszką
-
-### 3. Upload
-- Wgraj obraz i sprawdź wyniki
-- Sprawdź czy wszystkie nazwy są czytelne
-
-## Przykłady
-
-### Przed mapowaniem:
-```
-KNN: PLN50 (85.2%)
-RF: PLN50 (82.1%)
-SVM: PLN50 (79.8%)
-```
-
-### Po mapowaniu:
-```
-KNN: 50 PLN (85.2%)
-RF: 50 PLN (82.1%)
-SVM: 50 PLN (79.8%)
-```
-
-## Pliki zmienione
-- `Frontend/src/utils/banknoteMapper.js` - nowy plik z mapowaniem
-- `Frontend/src/User/Result/ResultPage.js` - używa mapowania
-- `Frontend/src/User/Menu/History/HistoryUtils.js` - mapuje historię
-- `Frontend/src/User/Menu/uploadutils.js` - mapuje wyniki uploadu
-

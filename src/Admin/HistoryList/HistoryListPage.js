@@ -8,7 +8,6 @@ import {
 import GlobalStyles from '../../components/GlobalStyles';
 import authService from '../../services/authService';
 
-// Usunięto nieużywaną ikonę FaDatabase
 import { FiArrowLeft } from "react-icons/fi";
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/Button';

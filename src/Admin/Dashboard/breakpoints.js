@@ -1,4 +1,4 @@
-// System breakpointów dla responsywności
+// Breakpointy dla responsywności
 export const breakpoints = {
   mobile: '480px',
   tablet: '768px',

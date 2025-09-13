@@ -8,7 +8,7 @@ import {
 import GlobalStyles from '../../components/GlobalStyles';
 import authService from '../../services/authService';
 
-// Usunięto nieużywaną ikonę FaUserCircle
+
 import { FiArrowLeft } from "react-icons/fi";
 import { useNavigate } from 'react-router-dom';
 import Button from '../../components/Button';
@@ -38,7 +38,7 @@ import {
 const UserListPage = () => {
   const navigate = useNavigate();
 
-  // Stany do przechowywania danych i komunikatów
+ 
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -52,7 +52,7 @@ const UserListPage = () => {
   });
   const [isCreatingUser, setIsCreatingUser] = useState(false);
 
-  // useEffect do pobrania danych po zamontowaniu komponentu
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -98,7 +98,7 @@ const UserListPage = () => {
           const errorData = await response.json();
           errorMessage = errorData.detail || errorMessage;
         } catch {
-          // Jeśli nie da się sparsować JSON, użyj ogólnego komunikatu
+
         }
         
         throw new Error(errorMessage);
@@ -177,7 +177,7 @@ const UserListPage = () => {
           const errorData = await response.json();
           errorMessage = errorData.detail || errorMessage;
         } catch {
-          // Jeśli nie da się sparsować JSON, użyj ogólnego komunikatu
+
         }
         
         throw new Error(errorMessage);
@@ -185,7 +185,7 @@ const UserListPage = () => {
 
       const createdUser = await response.json();
 
-      // Dodaj nowego użytkownika do lokalnego stanu
+      // Dodaj nowego użytkownika
       setUsers(prevUsers => [...prevUsers, createdUser]);
       
       // Reset formularza
@@ -237,13 +237,13 @@ const UserListPage = () => {
           const errorData = await response.json();
           errorMessage = errorData.detail || errorMessage;
         } catch {
-          // Jeśli nie da się sparsować JSON, użyj ogólnego komunikatu
+
         }
         
         throw new Error(errorMessage);
       }
 
-      // Usuń użytkownika z lokalnego stanu po udanym usunięciu
+      // Usuń użytkownik
       setUsers(prevUsers => prevUsers.filter(user => user.id !== userID));
       
       // Pokaż komunikat o sukcesie
